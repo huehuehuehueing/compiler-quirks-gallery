@@ -16,6 +16,10 @@ on:
         required: false
         default: '0'
 
+permissions:
+  actions: read
+  contents: read
+
 jobs:
   compile:
     runs-on: ubuntu-latest
