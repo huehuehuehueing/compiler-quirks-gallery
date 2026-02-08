@@ -1,0 +1,57 @@
+# Copyright (c) 2026 Larry H <l.gr [at] dartmouth [dot] edu>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Compiler Optimization Gallery - Dartmouth College COSC-69.16
+
+name: Compile Sources
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_path:
+        description: 'Source path to compile (e.g., src/ or src/security/)'
+        required: false
+        default: 'src/'
+      bypass_cache:
+        description: 'Bypass Compiler Explorer cache (0=use cache, 1=bypass)'
+        required: false
+        default: '0'
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install requests pyyaml
+
+      - name: Download previous output (if exists)
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          name: compiled-output
+          path: output/
+          if_no_artifact_found: ignore
+          workflow_conclusion: success
+
+      - name: Compile sources
+        run: |
+          python ce_batch.py \
+            --yaml docs/config.yaml \
+            --src ${{ github.event.inputs.source_path }} \
+            --out output \
+            --bypass-compile-cache ${{ github.event.inputs.bypass_cache }}
+
+      - name: Upload compiled output
+        uses: actions/upload-artifact@v4
+        with:
+          name: compiled-output
+          path: output/
+          retention-days: 90

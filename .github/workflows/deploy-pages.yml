@@ -1,0 +1,78 @@
+# Copyright (c) 2026 Larry H <l.gr [at] dartmouth [dot] edu>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Compiler Optimization Gallery - Dartmouth College COSC-69.16
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'build_book.py'
+      - 'templates/**'
+      - 'docs/**'
+      - '.github/workflows/deploy-pages.yml'
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Compile Sources"]
+    types:
+      - completed
+
+permissions:
+  contents: write
+
+# Allow only one concurrent deployment
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    # Only run if triggered manually, by push, or if compile workflow succeeded
+    if: >
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.conclusion == 'success'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download compiled output
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          name: compiled-output
+          path: output/
+          workflow: compile.yml
+          workflow_conclusion: success
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install mkdocs mkdocs-material jinja2 pyyaml
+
+      - name: Generate MkDocs source
+        run: |
+          python build_book.py \
+            --input output \
+            --output book \
+            --config docs/config.yaml \
+            --templates templates
+
+      - name: Build MkDocs site
+        run: |
+          cd book && mkdocs build --strict
+
+      - name: Deploy to github-pages-book branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: book/site
+          publish_branch: github-pages-book
+          force_orphan: true
