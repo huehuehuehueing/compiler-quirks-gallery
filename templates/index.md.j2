@@ -1,0 +1,26 @@
+{#
+  Copyright (c) 2026 Larry H <l.gr [at] dartmouth [dot] edu>
+  SPDX-License-Identifier: AGPL-3.0-or-later
+  Compiler Optimization Gallery - Dartmouth College COSC-69.16
+#}
+# {{ title }}
+
+{{ description }}
+
+## Optimization Scenarios
+
+| Scenario | Flags | Description |
+|----------|-------|-------------|
+{% for scenario in scenarios %}
+| [{{ scenario.title }}]({{ scenario.name }}/index.md) | `{{ scenario.flags }}` | {{ scenario.description | truncate(80) }} |
+{% endfor %}
+
+## Compilers
+
+This gallery includes assembly outputs from **{{ compilers | length }}** compilers across multiple architectures.
+
+[View full compiler list →](compilers.md)
+
+## About
+
+This documentation is auto-generated from [Compiler Explorer (Godbolt)](https://godbolt.org) outputs with AI-powered explanations.

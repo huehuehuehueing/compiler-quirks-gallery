@@ -1,0 +1,20 @@
+{#
+  Copyright (c) 2026 Larry H <l.gr [at] dartmouth [dot] edu>
+  SPDX-License-Identifier: AGPL-3.0-or-later
+  Compiler Optimization Gallery - Dartmouth College COSC-69.16
+#}
+# {{ scenario.title }}
+
+**Flags:** `{{ scenario.flags }}`
+
+{{ scenario.description }}
+
+---
+
+## Select a Compiler
+
+| Compiler | Architecture |
+|----------|--------------|
+{% for compiler in compilers %}
+| [{{ compiler.id }}]({{ compiler.id }}/index.md) | {{ compiler.id | detect_arch }} |
+{% endfor %}

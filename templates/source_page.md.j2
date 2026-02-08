@@ -1,0 +1,31 @@
+{#
+  Copyright (c) 2026 Larry H <l.gr [at] dartmouth [dot] edu>
+  SPDX-License-Identifier: AGPL-3.0-or-later
+  Compiler Optimization Gallery - Dartmouth College COSC-69.16
+#}
+# {{ source.name }}
+
+!!! info "Details"
+    **Source:** `{{ source.rel_path }}{{ source.extension }}`
+    **Compiler:** {{ compiler.id }} ({{ compiler.id | detect_arch }})
+    **Scenario:** {{ scenario.title }} (`{{ scenario.flags }}`)
+
+## Source Code
+
+```{{ source_lang }} title="{{ source.name }}{{ source.extension }}"
+{{ source_code }}
+```
+
+## Assembly Output
+
+```asm title="{{ source.name }}.asm" linenums="1"
+{{ assembly }}
+```
+
+## Explanation
+
+{{ explanation | normalize_headings }}
+
+---
+
+[← Back to {{ compiler.id }}](../index.md)

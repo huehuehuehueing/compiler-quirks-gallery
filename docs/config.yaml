@@ -1,0 +1,76 @@
+scenarios:
+  O0:
+    flags: "-O0"
+    title: "O0 - No Optimization"
+    description: |
+      No optimization. Code is compiled as-written with no transformations.
+      Useful as a baseline to see what optimizations actually do.
+      Debugging is easiest at this level.
+
+  O2:
+    flags: "-O2"
+    title: "O2 - Standard Optimization"
+    description: |
+      Standard optimization level providing a good balance between
+      compilation time and runtime performance. Enables most optimizations
+      that don't involve a space-speed tradeoff. This is the recommended
+      level for production builds.
+
+  O3:
+    flags: "-O3"
+    title: "O3 - Aggressive Optimization"
+    description: |
+      Aggressive optimization level that enables all O2 optimizations plus
+      additional transforms like loop unrolling, function inlining, and
+      vectorization that may increase code size.
+
+  Os:
+    flags: "-Os"
+    title: "Os - Size Optimization"
+    description: |
+      Optimize for code size rather than speed. Enables most O2 optimizations
+      but avoids those that increase code size. Useful for embedded systems
+      or when instruction cache pressure is a concern.
+
+  Ofast:
+    flags: "-Ofast"
+    title: "Ofast - Fast Math Optimization"
+    description: |
+      Maximum speed optimization. Enables O3 plus -ffast-math which allows
+      floating-point optimizations that may violate IEEE standards.
+      Can change numerical results and break NaN/infinity handling.
+      Use with caution in numerical code.
+
+# They must be supported, check https://godbolt.org/api/compilers
+compilers:
+  # AVR (8-bit embedded)
+  - avrg1520
+  # x86/x64 GCC
+  - cg152
+  # x86/x64 Clang
+  - clang1910
+  # Windows MinGW
+  - cmingw64_ucrt_gcc_1520
+  # MSVC x64
+  - vc_v19_44_VS17_14_x64
+  # MSVC x86
+  - vc_v19_44_VS17_14_x86
+  # MIPS
+  - mipsg1520
+  # SPARC
+  - csparcg1520
+  - csparc64g1520
+  # ARM
+  - armv7-clang2110
+  - armv8-clang2110
+
+# Display names for source categories (directory names -> titles)
+# If not specified, directory names are auto-converted (string-literals -> String Literals)
+sections:
+  loops: "Loop Optimizations"
+  string-literals: "String Literal Handling"
+  security: "Security-Critical Optimizations"
+  arithmetic: "Arithmetic Optimizations"
+  memory: "Memory Access Patterns"
+  control-flow: "Control Flow Transformations"
+  simd: "SIMD & Vectorization"

@@ -1,0 +1,39 @@
+{#
+  Copyright (c) 2026 Larry H <l.gr [at] dartmouth [dot] edu>
+  SPDX-License-Identifier: AGPL-3.0-or-later
+  Compiler Optimization Gallery - Dartmouth College COSC-69.16
+#}
+# Optimization Scenarios
+
+Each source file in this gallery is compiled under multiple optimization scenarios to demonstrate how different optimization levels affect the generated assembly.
+
+## Scenario Overview
+
+| Scenario | Compiler Flags | Description |
+|----------|----------------|-------------|
+{% for scenario in scenarios %}
+| **{{ scenario.name }}** | `{{ scenario.flags }}` | {{ scenario.flags | describe_flags }} |
+{% endfor %}
+
+## Understanding Optimization Levels
+
+### Common GCC/Clang Flags
+
+| Flag | Description |
+|------|-------------|
+| `-O0` | No optimization (default) |
+| `-O1` | Basic optimizations |
+| `-O2` | Standard optimizations (good balance) |
+| `-O3` | Aggressive optimizations (may increase code size) |
+| `-Os` | Optimize for size |
+| `-Ofast` | `-O3` plus fast-math and other aggressive options |
+
+### What to Look For
+
+When comparing assembly outputs across scenarios:
+
+1. **Loop unrolling** - Higher optimization levels may unroll loops
+2. **Inlining** - Functions may be inlined at higher levels
+3. **Dead code elimination** - Unused code is removed
+4. **Register allocation** - Better register usage at higher levels
+5. **Instruction selection** - More efficient instructions chosen
