@@ -514,8 +514,6 @@ def generate_mkdocs_config(
             "palette": [
                 {
                     "scheme": "default",
-                    "primary": "indigo",
-                    "accent": "indigo",
                     "toggle": {
                         "icon": "material/brightness-7",
                         "name": "Switch to dark mode",
@@ -523,8 +521,6 @@ def generate_mkdocs_config(
                 },
                 {
                     "scheme": "slate",
-                    "primary": "indigo",
-                    "accent": "indigo",
                     "toggle": {
                         "icon": "material/brightness-4",
                         "name": "Switch to light mode",
@@ -542,11 +538,40 @@ def generate_mkdocs_config(
             {"pymdownx.details": None},
             {"toc": {"permalink": True, "toc_depth": 4}},
         ],
+        "extra_css": ["custom.css"],
         "nav": nav,
     }
 
     config_path = output_dir / "mkdocs.yml"
     config_path.write_text(yaml.dump(config, default_flow_style=False, sort_keys=False), encoding="utf-8")
+
+    # Generate custom CSS with Dartmouth colors
+    docs_dir = output_dir / "docs"
+    docs_dir.mkdir(parents=True, exist_ok=True)
+    (docs_dir / "custom.css").write_text("""\
+/* Dartmouth Green (#00693e) for header backgrounds with white text */
+:root,
+[data-md-color-scheme="default"] {
+  --md-primary-fg-color: #00693e;
+  --md-primary-fg-color--light: #1a7a52;
+  --md-primary-fg-color--dark: #004d2e;
+  --md-primary-bg-color: #ffffff;
+  --md-primary-bg-color--light: #ffffffb3;
+  --md-accent-fg-color: #00693e;
+}
+
+/* Rich Forest Green (#0D1E1C) for dark mode backgrounds */
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #00693e;
+  --md-primary-fg-color--light: #1a7a52;
+  --md-primary-fg-color--dark: #004d2e;
+  --md-primary-bg-color: #ffffff;
+  --md-primary-bg-color--light: #ffffffb3;
+  --md-accent-fg-color: #00693e;
+  --md-default-bg-color: #0D1E1C;
+  --md-default-bg-color--light: #132926;
+}
+""", encoding="utf-8")
 
 
 # -----------------------------------------------------------------------------
