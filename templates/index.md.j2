@@ -12,7 +12,7 @@
 | Scenario | Flags | Description |
 |----------|-------|-------------|
 {% for scenario in scenarios %}
-| [{{ scenario.title }}]({{ scenario.name }}/index.md) | `{{ scenario.flags }}` | {{ scenario.description | replace("\n", " ") | truncate(80) }} |
+| [{{ scenario.title }}]({{ scenario.name }}/index.md) | `{{ scenario.flags }}` | {{ scenario.description | replace("\n", " ") | truncate(400) }} |
 {% endfor %}
 
 ## Compilers
