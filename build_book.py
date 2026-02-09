@@ -28,6 +28,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 import json
+import shutil
 
 try:
     from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -527,6 +528,8 @@ def generate_mkdocs_config(
                     },
                 },
             ],
+            "favicon": "assets/favicon.ico",
+            "logo": "assets/logo.png",
         },
         "markdown_extensions": [
             "pymdownx.highlight",
@@ -572,6 +575,14 @@ def generate_mkdocs_config(
   --md-default-bg-color--light: #132926;
 }
 """, encoding="utf-8")
+
+    # Copy Dartmouth D-Pine logo assets into book
+    assets_src = Path(__file__).resolve().parent / "docs" / "assets"
+    assets_dst = docs_dir / "assets"
+    if assets_src.exists():
+        if assets_dst.exists():
+            shutil.rmtree(assets_dst)
+        shutil.copytree(assets_src, assets_dst)
 
 
 # -----------------------------------------------------------------------------
