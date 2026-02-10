@@ -1,0 +1,22 @@
+/* Dartmouth Green (#00693e) for header backgrounds with white text */
+:root,
+[data-md-color-scheme="default"] {
+  --md-primary-fg-color: #00693e;
+  --md-primary-fg-color--light: #1a7a52;
+  --md-primary-fg-color--dark: #004d2e;
+  --md-primary-bg-color: #ffffff;
+  --md-primary-bg-color--light: #ffffffb3;
+  --md-accent-fg-color: #00693e;
+}
+
+/* Rich Forest Green (#0D1E1C) for dark mode backgrounds */
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #00693e;
+  --md-primary-fg-color--light: #1a7a52;
+  --md-primary-fg-color--dark: #004d2e;
+  --md-primary-bg-color: #ffffff;
+  --md-primary-bg-color--light: #ffffffb3;
+  --md-accent-fg-color: #00693e;
+  --md-default-bg-color: #0D1E1C;
+  --md-default-bg-color--light: #132926;
+}
