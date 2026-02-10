@@ -74,3 +74,4 @@ sections:
   memory: "Memory Access Patterns"
   control-flow: "Control Flow Transformations"
   simd: "SIMD & Vectorization"
+  hardening: "Compiler Hardening Features"

@@ -8,11 +8,12 @@
 from __future__ import annotations
 
 import json
+import re
 import time
 import hashlib
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
+from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple
 import urllib.parse
 
 import requests
@@ -20,6 +21,79 @@ import requests
 
 class CEError(RuntimeError):
     pass
+
+
+@dataclass
+class GalleryHints:
+    """Per-file hints parsed from ``/* @gallery-hints … */`` blocks."""
+    extra_flags: str = ""
+    replace_flags: Optional[str] = None
+    compiler_only: Optional[Set[str]] = None
+    compiler_exclude: Optional[Set[str]] = None
+    scenario_only: Optional[Set[str]] = None
+    scenario_exclude: Optional[Set[str]] = None
+
+    def should_compile(self, compiler_id: str, scenario_name: str) -> bool:
+        if self.compiler_only is not None and compiler_id not in self.compiler_only:
+            return False
+        if self.compiler_exclude is not None and compiler_id in self.compiler_exclude:
+            return False
+        if self.scenario_only is not None and scenario_name not in self.scenario_only:
+            return False
+        if self.scenario_exclude is not None and scenario_name in self.scenario_exclude:
+            return False
+        return True
+
+    def effective_flags(self, base_flags: str) -> str:
+        if self.replace_flags is not None:
+            return self.replace_flags
+        if self.extra_flags:
+            return f"{base_flags} {self.extra_flags}".strip()
+        return base_flags
+
+
+_HINTS_BLOCK_RE = re.compile(
+    r"/\*\s*@gallery-hints\b(.*?)\*/", re.DOTALL
+)
+
+_COMMA_SET_KEYS = {
+    "compiler-only", "compiler-exclude", "scenario-only", "scenario-exclude",
+}
+
+
+def parse_gallery_hints(source: str) -> GalleryHints:
+    """Parse a ``/* @gallery-hints … */`` block from C source text."""
+    m = _HINTS_BLOCK_RE.search(source)
+    if not m:
+        return GalleryHints()
+
+    hints = GalleryHints()
+    for line in m.group(1).splitlines():
+        line = line.strip().lstrip("*").strip()
+        if ":" not in line:
+            continue
+        key, _, value = line.partition(":")
+        key = key.strip().lower()
+        value = value.strip()
+        if not value:
+            continue
+
+        if key == "extra-flags":
+            hints.extra_flags = value
+        elif key == "replace-flags":
+            hints.replace_flags = value
+        elif key in _COMMA_SET_KEYS:
+            items = {v.strip() for v in value.split(",") if v.strip()}
+            if key == "compiler-only":
+                hints.compiler_only = items
+            elif key == "compiler-exclude":
+                hints.compiler_exclude = items
+            elif key == "scenario-only":
+                hints.scenario_only = items
+            elif key == "scenario-exclude":
+                hints.scenario_exclude = items
+
+    return hints
 
 
 @dataclass(frozen=True)
@@ -333,6 +407,12 @@ def process_source_tree(
         rel_path = str(rel_dir / base) if str(rel_dir) != "." else base
         src_text = p.read_text(encoding="utf-8", errors="replace")
 
+        # Parse per-file gallery hints and apply compiler/scenario filters.
+        hints = parse_gallery_hints(src_text)
+        if not hints.should_compile(compiler_id, scenario_name):
+            continue
+        effective_flags = hints.effective_flags(ce_user_arguments)
+
         current_index = file_index_offset + i + 1
 
         # Always write a copy of the input source for traceability.
@@ -353,7 +433,7 @@ def process_source_tree(
         comp = client.compile_to_asm(
             compiler_id=compiler_id,
             source=src_text,
-            user_arguments=ce_user_arguments,
+            user_arguments=effective_flags,
             lang=ce_lang_id,
             bypass_cache=bypass_compile_cache,
         )
@@ -382,7 +462,7 @@ def process_source_tree(
             language=explain_language,
             compiler=explain_compiler_human,
             code=src_text,
-            compilation_options=_split_flags(ce_user_arguments),
+            compilation_options=_split_flags(effective_flags),
             instruction_set=actual_instruction_set,
             asm_lines=asm_lines,
             audience=explain_audience,
