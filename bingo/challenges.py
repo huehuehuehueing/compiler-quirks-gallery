@@ -618,4 +618,220 @@ CHALLENGE_POOL: List[Challenge] = [
         hint="See: security/padding-leak",
         accept=["memset"],
     ),
+
+    # ===================================================================
+    # Integer Promotion  (2 challenges)
+    # ===================================================================
+    Challenge(
+        id="tf_promotion_tilde",
+        challenge_type="true_false",
+        category="arithmetic",
+        difficulty=2,
+        prompt="True or False: In C, ~(uint8_t)0xFF evaluates to 0x00",
+        answer="False \u2014 uint8_t is promoted to int before ~, so ~(int)0xFF = -256, not 0",
+        hint="See: arithmetic/integer-promotion",
+        accept=["false"],
+    ),
+    Challenge(
+        id="scen_promotion_dead",
+        challenge_type="scenario_compare",
+        category="arithmetic",
+        difficulty=2,
+        prompt="At -O2, 'if (~byte == 0)' where byte is uint8_t compiles to constant 'return 0' because of...",
+        answer="Integer promotion: ~byte promotes to int, so the result is never 0",
+        hint="See: arithmetic/integer-promotion",
+        accept=["integer promotion", "int promotion"],
+    ),
+
+    # ===================================================================
+    # Dead Code After Noreturn  (2 challenges)
+    # ===================================================================
+    Challenge(
+        id="sec_noreturn_fallthrough",
+        challenge_type="security",
+        category="control-flow",
+        difficulty=3,
+        prompt="If a function marked __attribute__((noreturn)) actually returns, execution may...",
+        answer="Fall through into the next function's code (all code after the call was eliminated)",
+        hint="See: control-flow/dead-code-after-noreturn",
+        accept=["fall through", "next function", "dead code"],
+    ),
+    Challenge(
+        id="tf_noreturn_cleanup",
+        challenge_type="true_false",
+        category="control-flow",
+        difficulty=2,
+        prompt="True or False: Code placed after a call to a noreturn function is guaranteed to remain in the binary",
+        answer="False \u2014 the compiler eliminates it as unreachable dead code",
+        hint="See: control-flow/dead-code-after-noreturn",
+        accept=["false"],
+    ),
+
+    # ===================================================================
+    # Loop Unswitching  (2 challenges)
+    # ===================================================================
+    Challenge(
+        id="asm_loop_unswitched",
+        challenge_type="asm_pattern",
+        category="loops",
+        difficulty=2,
+        prompt="Two separate loops in the assembly \u2014 each calling a different function \u2014 where the source has one loop with an if/else indicates...",
+        answer="Loop unswitching (loop-invariant conditional hoisted outside)",
+        hint="See: loops/loop-unswitching",
+        accept=["loop unswitching", "loop unswitch"],
+    ),
+    Challenge(
+        id="scen_unswitching_tradeoff",
+        challenge_type="scenario_compare",
+        category="loops",
+        difficulty=2,
+        prompt="Loop unswitching improves runtime by removing a branch from the hot loop, but the trade-off is...",
+        answer="Doubled code size for the loop body (suppressed at -Os)",
+        hint="See: loops/loop-unswitching",
+        accept=["code size", "doubled", "duplicate"],
+    ),
+
+    # ===================================================================
+    # memcmp Timing  (2 challenges)
+    # ===================================================================
+    Challenge(
+        id="sec_memcmp_timing",
+        challenge_type="security",
+        category="security",
+        difficulty=2,
+        prompt="Using memcmp() to verify authentication tokens is vulnerable to...",
+        answer="Timing side channel (early exit reveals how many bytes matched)",
+        hint="See: security/memcmp-timing",
+        accept=["timing", "side channel"],
+    ),
+    Challenge(
+        id="scen_constant_time",
+        challenge_type="scenario_compare",
+        category="security",
+        difficulty=2,
+        prompt="A constant-time comparison XORs every byte pair and ORs the results into a volatile accumulator to prevent...",
+        answer="The compiler from short-circuiting (branching on partial results)",
+        hint="See: security/memcmp-timing",
+        accept=["short-circuit", "short circuit", "branch"],
+    ),
+
+    # ===================================================================
+    # memcpy Direction  (2 challenges)
+    # ===================================================================
+    Challenge(
+        id="sec_memcpy_overlap",
+        challenge_type="security",
+        category="security",
+        difficulty=1,
+        prompt="Using memcpy() with overlapping source and destination buffers is...",
+        answer="Undefined behavior \u2014 use memmove() for overlapping regions",
+        hint="See: security/memcpy-direction",
+        accept=["undefined behav", "ub", "memmove"],
+    ),
+    Challenge(
+        id="tf_memmove_overlap",
+        challenge_type="true_false",
+        category="security",
+        difficulty=1,
+        prompt="True or False: memmove() handles overlapping memory regions correctly, unlike memcpy()",
+        answer="True \u2014 memmove checks direction and copies safely; memcpy may copy in any order",
+        hint="See: security/memcpy-direction",
+        accept=["true"],
+    ),
+
+    # ===================================================================
+    # Return Value Overwrite  (2 challenges)
+    # ===================================================================
+    Challenge(
+        id="sec_dangling_local",
+        challenge_type="security",
+        category="security",
+        difficulty=2,
+        prompt="Returning a pointer to a local variable is UB; at -O2 GCC may replace the entire function with...",
+        answer="return NULL (xor eax, eax; ret) \u2014 the local is optimized away entirely",
+        hint="See: security/return-value-overwrite",
+        accept=["null", "xor eax"],
+    ),
+    Challenge(
+        id="tf_dangling_o0",
+        challenge_type="true_false",
+        category="security",
+        difficulty=2,
+        prompt="True or False: Returning a pointer to a local variable may appear to work at -O0 but fail at -O2",
+        answer="True \u2014 at -O0 the stack frame is intact; at -O2 the local may be in a register or eliminated",
+        hint="See: security/return-value-overwrite",
+        accept=["true"],
+    ),
+
+    # ===================================================================
+    # Signed/Unsigned Compare  (2 challenges)
+    # ===================================================================
+    Challenge(
+        id="sec_signed_unsigned",
+        challenge_type="security",
+        category="security",
+        difficulty=2,
+        prompt="A negative signed int compared against size_t bypasses bounds checks because...",
+        answer="Implicit conversion to unsigned wraps the negative value to a huge number",
+        hint="See: security/signed-unsigned-compare",
+        accept=["unsigned", "wrap", "implicit conver", "promot"],
+    ),
+    Challenge(
+        id="tf_negative_size_t",
+        challenge_type="true_false",
+        category="security",
+        difficulty=1,
+        prompt="True or False: Casting (int)-1 to size_t yields 0",
+        answer="False \u2014 it yields SIZE_MAX (0xFFFFFFFFFFFFFFFF on 64-bit)",
+        hint="See: security/signed-unsigned-compare",
+        accept=["false"],
+    ),
+
+    # ===================================================================
+    # Type Width Truncation  (2 challenges)
+    # ===================================================================
+    Challenge(
+        id="sec_truncation",
+        challenge_type="security",
+        category="security",
+        difficulty=2,
+        prompt="Assigning a size_t to unsigned short before a bounds check fails because...",
+        answer="High bits are silently truncated (e.g. 65540 becomes 4, passing a <= 1024 check)",
+        hint="See: security/type-width-truncation",
+        accept=["truncat", "high bits"],
+    ),
+    Challenge(
+        id="asm_truncation_cmpw",
+        challenge_type="asm_pattern",
+        category="security",
+        difficulty=3,
+        prompt="A 16-bit comparison (cmpw) where the source code uses size_t indicates...",
+        answer="Integer truncation vulnerability (narrowing conversion before bounds check)",
+        hint="See: security/type-width-truncation",
+        accept=["truncat", "narrowing"],
+    ),
+
+    # ===================================================================
+    # VLA Stack Overflow  (2 challenges)
+    # ===================================================================
+    Challenge(
+        id="sec_vla_stack",
+        challenge_type="security",
+        category="security",
+        difficulty=2,
+        prompt="A Variable-Length Array (VLA) sized by untrusted input can...",
+        answer="Exhaust the stack instantly, potentially bypassing stack clash protection",
+        hint="See: security/vla-stack-overflow",
+        accept=["stack", "exhaust", "overflow"],
+    ),
+    Challenge(
+        id="tf_vla_bounds",
+        challenge_type="true_false",
+        category="security",
+        difficulty=1,
+        prompt="True or False: The C compiler inserts bounds checks for Variable-Length Array sizes",
+        answer="False \u2014 VLAs have no runtime size validation; the programmer must check bounds",
+        hint="See: security/vla-stack-overflow",
+        accept=["false"],
+    ),
 ]
