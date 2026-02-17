@@ -1,0 +1,3268 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../../assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>auto-vectorize - Compiler Optimization Gallery</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../custom.css">
+    
+    <script>__md_scope=new URL("../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#auto-vectorize" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../../.." title="Compiler Optimization Gallery" class="md-header__button md-logo" aria-label="Compiler Optimization Gallery" data-md-component="logo">
+      
+  <img src="../../../../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Compiler Optimization Gallery
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              auto-vectorize
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../.." title="Compiler Optimization Gallery" class="md-nav__button md-logo" aria-label="Compiler Optimization Gallery" data-md-component="logo">
+      
+  <img src="../../../../assets/logo.png" alt="logo">
+
+    </a>
+    Compiler Optimization Gallery
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../compilers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compilers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../../O0/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    O0 - No Optimization
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    O0 - No Optimization
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O0/armv7-clang2110/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    armv7-clang2110
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O0/armv8-clang2110/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    armv8-clang2110
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O0/avrg1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    avrg1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O0/cg152/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    cg152
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O0/clang1910/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    clang1910
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O0/cmingw64_ucrt_gcc_1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    cmingw64_ucrt_gcc_1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O0/csparc64g1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    csparc64g1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O0/csparcg1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    csparcg1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O0/mipsg1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    mipsg1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O0/vc_v19_44_VS17_14_x64/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vc_v19_44_VS17_14_x64
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O0/vc_v19_44_VS17_14_x86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vc_v19_44_VS17_14_x86
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../../O2/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    O2 - Standard Optimization
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    O2 - Standard Optimization
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O2/armv7-clang2110/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    armv7-clang2110
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O2/armv8-clang2110/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    armv8-clang2110
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O2/avrg1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    avrg1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O2/cg152/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    cg152
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O2/clang1910/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    clang1910
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O2/cmingw64_ucrt_gcc_1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    cmingw64_ucrt_gcc_1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O2/csparc64g1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    csparc64g1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O2/csparcg1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    csparcg1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O2/mipsg1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    mipsg1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O2/vc_v19_44_VS17_14_x64/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vc_v19_44_VS17_14_x64
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O2/vc_v19_44_VS17_14_x86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vc_v19_44_VS17_14_x86
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../../O3/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    O3 - Aggressive Optimization
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_5" id="__nav_5_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    O3 - Aggressive Optimization
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O3/armv7-clang2110/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    armv7-clang2110
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O3/armv8-clang2110/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    armv8-clang2110
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O3/avrg1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    avrg1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O3/cg152/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    cg152
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O3/clang1910/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    clang1910
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O3/cmingw64_ucrt_gcc_1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    cmingw64_ucrt_gcc_1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O3/csparc64g1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    csparc64g1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O3/csparcg1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    csparcg1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O3/mipsg1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    mipsg1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O3/vc_v19_44_VS17_14_x64/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vc_v19_44_VS17_14_x64
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O3/vc_v19_44_VS17_14_x86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vc_v19_44_VS17_14_x86
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ofast - Fast Math Optimization
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_6" id="__nav_6_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Ofast - Fast Math Optimization
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../armv7-clang2110/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    armv7-clang2110
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../armv8-clang2110/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    armv8-clang2110
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../avrg1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    avrg1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cg152/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    cg152
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    clang1910
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cmingw64_ucrt_gcc_1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    cmingw64_ucrt_gcc_1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../csparc64g1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    csparc64g1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../csparcg1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    csparcg1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../mipsg1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    mipsg1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../vc_v19_44_VS17_14_x64/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vc_v19_44_VS17_14_x64
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../vc_v19_44_VS17_14_x86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vc_v19_44_VS17_14_x86
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../../Os/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Os - Size Optimization
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_7" id="__nav_7_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Os - Size Optimization
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../Os/armv7-clang2110/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    armv7-clang2110
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../Os/armv8-clang2110/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    armv8-clang2110
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../Os/avrg1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    avrg1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../Os/cg152/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    cg152
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../Os/clang1910/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    clang1910
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../Os/cmingw64_ucrt_gcc_1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    cmingw64_ucrt_gcc_1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../Os/csparc64g1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    csparc64g1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../Os/csparcg1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    csparcg1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../Os/mipsg1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    mipsg1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../Os/vc_v19_44_VS17_14_x64/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vc_v19_44_VS17_14_x64
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../Os/vc_v19_44_VS17_14_x86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vc_v19_44_VS17_14_x86
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#source-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Source Code
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#assembly-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Assembly Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#explanation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Explanation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Explanation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-core-pattern-vectorization-opportunities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Core Pattern: Vectorization Opportunities
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#function-by-function-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Function-by-Function Analysis
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Function-by-Function Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#add_arrays-vectorized-simd-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        add_arrays: Vectorized (SIMD operations)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sum_array-partially-vectorized-with-scalar-fallback" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sum_array: Partially Vectorized with Scalar Fallback
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fibonacci_array-not-vectorized-serial-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fibonacci_array: Not Vectorized (Serial Loop)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#clamp_array-vectorized-with-masking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        clamp_array: Vectorized with Masking
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-observations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Observations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="auto-vectorize">auto-vectorize<a class="headerlink" href="#auto-vectorize" title="Permanent link">&para;</a></h1>
+<div class="admonition info">
+<p class="admonition-title">Details</p>
+<p><strong>Source:</strong> <code>simd/auto-vectorize.c</code>
+<strong>Compiler:</strong> clang1910 (x86/x64)
+<strong>Scenario:</strong> Ofast - Fast Math Optimization (<code>-Ofast</code>)</p>
+</div>
+<h2 id="source-code">Source Code<a class="headerlink" href="#source-code" title="Permanent link">&para;</a></h2>
+<div class="highlight"><span class="filename">auto-vectorize.c</span><pre><span></span><code><span class="cm">/*</span>
+<span class="cm"> * Auto-vectorization: loops converted to SIMD operations.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Compiler transforms scalar loops into vector operations</span>
+<span class="cm"> * (SSE, AVX, NEON, etc.) processing multiple elements at once.</span>
+<span class="cm"> */</span>
+
+<span class="cm">/* Simple loop - prime candidate for vectorization */</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">add_arrays</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="o">*</span><span class="n">dst</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="o">*</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="o">*</span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">n</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">dst</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="cm">/* With -O3: becomes SIMD adds processing 4-8 floats at once */</span>
+<span class="p">}</span>
+
+<span class="cm">/* Reduction - trickier to vectorize but often done */</span>
+<span class="kt">float</span><span class="w"> </span><span class="nf">sum_array</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="o">*</span><span class="n">arr</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">n</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">sum</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">sum</span><span class="p">;</span>
+<span class="w">    </span><span class="cm">/* May use horizontal add instructions or partial sums */</span>
+<span class="p">}</span>
+
+<span class="cm">/* Loop with dependency - CANNOT be vectorized */</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">fibonacci_array</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="n">arr</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">n</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">arr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">arr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="cm">/* Each iteration depends on previous two - serial */</span>
+<span class="w">        </span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="mi">-1</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="mi">-2</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="cm">/* Conditional in loop - may use masked operations */</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">clamp_array</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="o">*</span><span class="n">arr</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">min</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">max</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">min</span><span class="p">)</span><span class="w"> </span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">min</span><span class="p">;</span>
+<span class="w">        </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">max</span><span class="p">)</span><span class="w"> </span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">max</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="assembly-output">Assembly Output<a class="headerlink" href="#assembly-output" title="Permanent link">&para;</a></h2>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">auto-vectorize.asm</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">  1</span>
+<span class="normal">  2</span>
+<span class="normal">  3</span>
+<span class="normal">  4</span>
+<span class="normal">  5</span>
+<span class="normal">  6</span>
+<span class="normal">  7</span>
+<span class="normal">  8</span>
+<span class="normal">  9</span>
+<span class="normal"> 10</span>
+<span class="normal"> 11</span>
+<span class="normal"> 12</span>
+<span class="normal"> 13</span>
+<span class="normal"> 14</span>
+<span class="normal"> 15</span>
+<span class="normal"> 16</span>
+<span class="normal"> 17</span>
+<span class="normal"> 18</span>
+<span class="normal"> 19</span>
+<span class="normal"> 20</span>
+<span class="normal"> 21</span>
+<span class="normal"> 22</span>
+<span class="normal"> 23</span>
+<span class="normal"> 24</span>
+<span class="normal"> 25</span>
+<span class="normal"> 26</span>
+<span class="normal"> 27</span>
+<span class="normal"> 28</span>
+<span class="normal"> 29</span>
+<span class="normal"> 30</span>
+<span class="normal"> 31</span>
+<span class="normal"> 32</span>
+<span class="normal"> 33</span>
+<span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nf">add_arrays</span><span class="p">(</span><span class="no">float</span><span class="p">*,</span><span class="w"> </span><span class="no">float</span><span class="w"> </span><span class="no">const</span><span class="p">*,</span><span class="w"> </span><span class="no">float</span><span class="w"> </span><span class="no">const</span><span class="p">*,</span><span class="w"> </span><span class="no">int</span><span class="p">):</span>
+<span class="w">        </span><span class="nf">test</span><span class="w">    </span><span class="no">ecx</span><span class="p">,</span><span class="w"> </span><span class="no">ecx</span>
+<span class="w">        </span><span class="nf">jle</span><span class="w">     </span><span class="no">.LBB0_12</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="no">ecx</span>
+<span class="w">        </span><span class="nf">cmp</span><span class="w">     </span><span class="no">ecx</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span>
+<span class="w">        </span><span class="nf">jbe</span><span class="w">     </span><span class="no">.LBB0_2</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">rcx</span><span class="p">,</span><span class="w"> </span><span class="no">rdi</span>
+<span class="w">        </span><span class="nf">sub</span><span class="w">     </span><span class="no">rcx</span><span class="p">,</span><span class="w"> </span><span class="no">rsi</span>
+<span class="w">        </span><span class="nf">cmp</span><span class="w">     </span><span class="no">rcx</span><span class="p">,</span><span class="w"> </span><span class="mi">32</span>
+<span class="w">        </span><span class="nf">setb</span><span class="w">    </span><span class="no">cl</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">r8</span><span class="p">,</span><span class="w"> </span><span class="no">rdi</span>
+<span class="w">        </span><span class="nf">sub</span><span class="w">     </span><span class="no">r8</span><span class="p">,</span><span class="w"> </span><span class="no">rdx</span>
+<span class="w">        </span><span class="nf">cmp</span><span class="w">     </span><span class="no">r8</span><span class="p">,</span><span class="w"> </span><span class="mi">32</span>
+<span class="w">        </span><span class="nf">setb</span><span class="w">    </span><span class="no">r8b</span>
+<span class="w">        </span><span class="nf">or</span><span class="w">      </span><span class="no">r8b</span><span class="p">,</span><span class="w"> </span><span class="no">cl</span>
+<span class="w">        </span><span class="nf">je</span><span class="w">      </span><span class="no">.LBB0_9</span>
+<span class="nl">.LBB0_2:</span>
+<span class="w">        </span><span class="nf">xor</span><span class="w">     </span><span class="no">ecx</span><span class="p">,</span><span class="w"> </span><span class="no">ecx</span>
+<span class="nl">.LBB0_3:</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">r9</span><span class="p">,</span><span class="w"> </span><span class="no">rax</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">r8</span><span class="p">,</span><span class="w"> </span><span class="no">rcx</span>
+<span class="w">        </span><span class="nf">and</span><span class="w">     </span><span class="no">r9</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span>
+<span class="w">        </span><span class="nf">je</span><span class="w">      </span><span class="no">.LBB0_6</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">r8</span><span class="p">,</span><span class="w"> </span><span class="no">rcx</span>
+<span class="nl">.LBB0_5:</span>
+<span class="w">        </span><span class="nf">movss</span><span class="w">   </span><span class="no">xmm0</span><span class="p">,</span><span class="w"> </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdx</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">*</span><span class="no">r8</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">addss</span><span class="w">   </span><span class="no">xmm0</span><span class="p">,</span><span class="w"> </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rsi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">*</span><span class="no">r8</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">movss</span><span class="w">   </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">*</span><span class="no">r8</span><span class="p">],</span><span class="w"> </span><span class="no">xmm0</span>
+<span class="w">        </span><span class="nf">inc</span><span class="w">     </span><span class="no">r8</span>
+<span class="w">        </span><span class="nf">dec</span><span class="w">     </span><span class="no">r9</span>
+<span class="w">        </span><span class="nf">jne</span><span class="w">     </span><span class="no">.LBB0_5</span>
+<span class="nl">.LBB0_6:</span>
+<span class="w">        </span><span class="nf">sub</span><span class="w">     </span><span class="no">rcx</span><span class="p">,</span><span class="w"> </span><span class="no">rax</span>
+<span class="w">        </span><span class="nf">cmp</span><span class="w">     </span><span class="no">rcx</span><span class="p">,</span><span class="w"> </span><span class="mi">-4</span>
+<span class="w">        </span><span class="nf">ja</span><span class="w">      </span><span class="no">.LBB0_12</span>
+<span class="nl">.LBB0_7:</span>
+<span class="w">        </span><span class="nf">movss</span><span class="w">   </span><span class="no">xmm0</span><span class="p">,</span><span class="w"> </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdx</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">*</span><span class="no">r8</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">addss</span><span class="w">   </span><span class="no">xmm0</span><span class="p">,</span><span class="w"> </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rsi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">*</span><span class="no">r8</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">movss</span><span class="w">   </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">*</span><span class="no">r8</span><span class="p">],</span><span class="w"> </span><span class="no">xmm0</span>
+<span class="w">        </span><span class="nf">movss</span><span class="w">   </span><span class="no">xmm0</span><span class="p">,</span><span class="w"> </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdx</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">*</span><span class="no">r8</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">addss</span><span class="w">   </span><span class="no">xmm0</span><span class="p">,</span><span class="w"> </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rsi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">*</span><span class="no">r8</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">movss</span><span class="w">   </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">*</span><span class="no">r8</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">],</span><span class="w"> </span><span class="no">xmm0</span>
+<span class="w">        </span><span class="nf">movss</span><span class="w">   </span><span class="no">xmm0</span><span class="p">,</span><span class="w"> </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdx</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">*</span><span class="no">r8</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">8</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">addss</span><span class="w">   </span><span class="no">xmm0</span><span class="p">,</span><span class="w"> </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rsi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">*</span><span class="no">r8</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">8</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">movss</span><span class="w">   </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">*</span><span class="no">r8</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">8</span><span class="p">],</span><span class="w"> </span><span class="no">xmm0</span>
+<span class="w">        </span><span class="nf">movss</span><span class="w">   </span><span class="no">xmm0</span><span class="p">,</span><span class="w"> </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdx</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">*</span><span class="no">r8</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">12</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">addss</span><span class="w">   </span><span class="no">xmm0</span><span class="p">,</span><span class="w"> </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rsi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">*</span><span class="no">r8</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">12</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">movss</span><span class="w">   </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">*</span><span class="no">r8</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">12</span><span class="p">],</span><span class="w"> </span><span class="no">xmm0</span>
+<span class="w">        </span><span class="nf">add</span><span class="w">     </span><span class="no">r8</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span>
+<span class="w">        </span><span class="nf">cmp</span><span class="w">     </span><span class="no">rax</span><span class="p">,</span><span class="w"> </span><span class="no">r8</span>
+<span class="w">        </span><span class="nf">jne</span><span class="w">     </span><span class="no">.LBB0_7</span>
+<span class="w">        </span><span class="nf">jmp</span><span class="w">     </span><span class="no">.LBB0_12</span>
+<span class="nl">.LBB0_9:</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">ecx</span><span class="p">,</span><span class="w"> </span><span class="no">eax</span>
+<span class="w">        </span><span class="nf">and</span><span class="w">     </span><span class="no">ecx</span><span class="p">,</span><span class="w"> </span><span class="mi">2147483640</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">r8d</span><span class="p">,</span><span class="w"> </span><span class="no">eax</span>
+<span class="w">        </span><span class="nf">shr</span><span class="w">     </span><span class="no">r8d</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span>
+<span class="w">        </span><span class="nf">and</span><span class="w">     </span><span class="no">r8d</span><span class="p">,</span><span class="w"> </span><span class="mi">268435455</span>
+<span class="w">        </span><span class="nf">shl</span><span class="w">     </span><span class="no">r8</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span>
+<span class="w">        </span><span class="nf">xor</span><span class="w">     </span><span class="no">r9d</span><span class="p">,</span><span class="w"> </span><span class="no">r9d</span>
+<span class="nl">.LBB0_10:</span>
+<span class="w">        </span><span class="nf">movups</span><span class="w">  </span><span class="no">xmm0</span><span class="p">,</span><span class="w"> </span><span class="no">xmmword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rsi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="no">r9</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">movups</span><span class="w">  </span><span class="no">xmm1</span><span class="p">,</span><span class="w"> </span><span class="no">xmmword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rsi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="no">r9</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">16</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">movups</span><span class="w">  </span><span class="no">xmm2</span><span class="p">,</span><span class="w"> </span><span class="no">xmmword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdx</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="no">r9</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">addps</span><span class="w">   </span><span class="no">xmm2</span><span class="p">,</span><span class="w"> </span><span class="no">xmm0</span>
+<span class="w">        </span><span class="nf">movups</span><span class="w">  </span><span class="no">xmm0</span><span class="p">,</span><span class="w"> </span><span class="no">xmmword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdx</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="no">r9</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">16</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">addps</span><span class="w">   </span><span class="no">xmm0</span><span class="p">,</span><span class="w"> </span><span class="no">xmm1</span>
+<span class="w">        </span><span class="nf">movups</span><span class="w">  </span><span class="no">xmmword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="no">r9</span><span class="p">],</span><span class="w"> </span><span class="no">xmm2</span>
+<span class="w">        </span><span class="nf">movups</span><span class="w">  </span><span class="no">xmmword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="no">r9</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">16</span><span class="p">],</span><span class="w"> </span><span class="no">xmm0</span>
+<span class="w">        </span><span class="nf">add</span><span class="w">     </span><span class="no">r9</span><span class="p">,</span><span class="w"> </span><span class="mi">32</span>
+<span class="w">        </span><span class="nf">cmp</span><span class="w">     </span><span class="no">r8</span><span class="p">,</span><span class="w"> </span><span class="no">r9</span>
+<span class="w">        </span><span class="nf">jne</span><span class="w">     </span><span class="no">.LBB0_10</span>
+<span class="w">        </span><span class="nf">cmp</span><span class="w">     </span><span class="no">ecx</span><span class="p">,</span><span class="w"> </span><span class="no">eax</span>
+<span class="w">        </span><span class="nf">jne</span><span class="w">     </span><span class="no">.LBB0_3</span>
+<span class="nl">.LBB0_12:</span>
+<span class="w">        </span><span class="nf">ret</span>
+
+<span class="nf">sum_array</span><span class="p">(</span><span class="no">float</span><span class="w"> </span><span class="no">const</span><span class="p">*,</span><span class="w"> </span><span class="no">int</span><span class="p">):</span>
+<span class="w">        </span><span class="nf">test</span><span class="w">    </span><span class="no">esi</span><span class="p">,</span><span class="w"> </span><span class="no">esi</span>
+<span class="w">        </span><span class="nf">jle</span><span class="w">     </span><span class="no">.LBB1_1</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="no">esi</span>
+<span class="w">        </span><span class="nf">cmp</span><span class="w">     </span><span class="no">esi</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span>
+<span class="w">        </span><span class="nf">ja</span><span class="w">      </span><span class="no">.LBB1_4</span>
+<span class="w">        </span><span class="nf">xorps</span><span class="w">   </span><span class="no">xmm0</span><span class="p">,</span><span class="w"> </span><span class="no">xmm0</span>
+<span class="w">        </span><span class="nf">xor</span><span class="w">     </span><span class="no">ecx</span><span class="p">,</span><span class="w"> </span><span class="no">ecx</span>
+<span class="w">        </span><span class="nf">jmp</span><span class="w">     </span><span class="no">.LBB1_7</span>
+<span class="nl">.LBB1_1:</span>
+<span class="w">        </span><span class="nf">xorps</span><span class="w">   </span><span class="no">xmm0</span><span class="p">,</span><span class="w"> </span><span class="no">xmm0</span>
+<span class="w">        </span><span class="nf">ret</span>
+<span class="nl">.LBB1_4:</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">ecx</span><span class="p">,</span><span class="w"> </span><span class="no">eax</span>
+<span class="w">        </span><span class="nf">and</span><span class="w">     </span><span class="no">ecx</span><span class="p">,</span><span class="w"> </span><span class="mi">2147483640</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">edx</span><span class="p">,</span><span class="w"> </span><span class="no">eax</span>
+<span class="w">        </span><span class="nf">shr</span><span class="w">     </span><span class="no">edx</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span>
+<span class="w">        </span><span class="nf">and</span><span class="w">     </span><span class="no">edx</span><span class="p">,</span><span class="w"> </span><span class="mi">268435455</span>
+<span class="w">        </span><span class="nf">shl</span><span class="w">     </span><span class="no">rdx</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span>
+<span class="w">        </span><span class="nf">xorps</span><span class="w">   </span><span class="no">xmm0</span><span class="p">,</span><span class="w"> </span><span class="no">xmm0</span>
+<span class="w">        </span><span class="nf">xor</span><span class="w">     </span><span class="no">esi</span><span class="p">,</span><span class="w"> </span><span class="no">esi</span>
+<span class="w">        </span><span class="nf">xorps</span><span class="w">   </span><span class="no">xmm1</span><span class="p">,</span><span class="w"> </span><span class="no">xmm1</span>
+<span class="nl">.LBB1_5:</span>
+<span class="w">        </span><span class="nf">movups</span><span class="w">  </span><span class="no">xmm2</span><span class="p">,</span><span class="w"> </span><span class="no">xmmword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="no">rsi</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">addps</span><span class="w">   </span><span class="no">xmm0</span><span class="p">,</span><span class="w"> </span><span class="no">xmm2</span>
+<span class="w">        </span><span class="nf">movups</span><span class="w">  </span><span class="no">xmm2</span><span class="p">,</span><span class="w"> </span><span class="no">xmmword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="no">rsi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">16</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">addps</span><span class="w">   </span><span class="no">xmm1</span><span class="p">,</span><span class="w"> </span><span class="no">xmm2</span>
+<span class="w">        </span><span class="nf">add</span><span class="w">     </span><span class="no">rsi</span><span class="p">,</span><span class="w"> </span><span class="mi">32</span>
+<span class="w">        </span><span class="nf">cmp</span><span class="w">     </span><span class="no">rdx</span><span class="p">,</span><span class="w"> </span><span class="no">rsi</span>
+<span class="w">        </span><span class="nf">jne</span><span class="w">     </span><span class="no">.LBB1_5</span>
+<span class="w">        </span><span class="nf">addps</span><span class="w">   </span><span class="no">xmm1</span><span class="p">,</span><span class="w"> </span><span class="no">xmm0</span>
+<span class="w">        </span><span class="nf">movaps</span><span class="w">  </span><span class="no">xmm2</span><span class="p">,</span><span class="w"> </span><span class="no">xmm1</span>
+<span class="w">        </span><span class="nf">unpckhpd</span><span class="w">        </span><span class="no">xmm2</span><span class="p">,</span><span class="w"> </span><span class="no">xmm1</span>
+<span class="w">        </span><span class="nf">addps</span><span class="w">   </span><span class="no">xmm2</span><span class="p">,</span><span class="w"> </span><span class="no">xmm1</span>
+<span class="w">        </span><span class="nf">movaps</span><span class="w">  </span><span class="no">xmm0</span><span class="p">,</span><span class="w"> </span><span class="no">xmm2</span>
+<span class="w">        </span><span class="nf">shufps</span><span class="w">  </span><span class="no">xmm0</span><span class="p">,</span><span class="w"> </span><span class="no">xmm2</span><span class="p">,</span><span class="w"> </span><span class="mi">85</span>
+<span class="w">        </span><span class="nf">addss</span><span class="w">   </span><span class="no">xmm0</span><span class="p">,</span><span class="w"> </span><span class="no">xmm2</span>
+<span class="w">        </span><span class="nf">cmp</span><span class="w">     </span><span class="no">ecx</span><span class="p">,</span><span class="w"> </span><span class="no">eax</span>
+<span class="w">        </span><span class="nf">je</span><span class="w">      </span><span class="no">.LBB1_8</span>
+<span class="nl">.LBB1_7:</span>
+<span class="w">        </span><span class="nf">addss</span><span class="w">   </span><span class="no">xmm0</span><span class="p">,</span><span class="w"> </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">*</span><span class="no">rcx</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">inc</span><span class="w">     </span><span class="no">rcx</span>
+<span class="w">        </span><span class="nf">cmp</span><span class="w">     </span><span class="no">rax</span><span class="p">,</span><span class="w"> </span><span class="no">rcx</span>
+<span class="w">        </span><span class="nf">jne</span><span class="w">     </span><span class="no">.LBB1_7</span>
+<span class="nl">.LBB1_8:</span>
+<span class="w">        </span><span class="nf">ret</span>
+
+<span class="nf">fibonacci_array</span><span class="p">(</span><span class="no">int</span><span class="p">*,</span><span class="w"> </span><span class="no">int</span><span class="p">):</span>
+<span class="w">        </span><span class="nf">movabs</span><span class="w">  </span><span class="no">rax</span><span class="p">,</span><span class="w"> </span><span class="mi">4294967296</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">qword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdi</span><span class="p">],</span><span class="w"> </span><span class="no">rax</span>
+<span class="w">        </span><span class="nf">cmp</span><span class="w">     </span><span class="no">esi</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span>
+<span class="w">        </span><span class="nf">jl</span><span class="w">      </span><span class="no">.LBB2_7</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">r8d</span><span class="p">,</span><span class="w"> </span><span class="no">esi</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">lea</span><span class="w">     </span><span class="no">rdx</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">r8</span><span class="w"> </span><span class="p">-</span><span class="w"> </span><span class="mi">2</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">add</span><span class="w">     </span><span class="no">r8</span><span class="p">,</span><span class="w"> </span><span class="mi">-3</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">ecx</span><span class="p">,</span><span class="w"> </span><span class="no">edx</span>
+<span class="w">        </span><span class="nf">and</span><span class="w">     </span><span class="no">ecx</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">esi</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span>
+<span class="w">        </span><span class="nf">cmp</span><span class="w">     </span><span class="no">r8</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span>
+<span class="w">        </span><span class="nf">jb</span><span class="w">      </span><span class="no">.LBB2_4</span>
+<span class="w">        </span><span class="nf">and</span><span class="w">     </span><span class="no">rdx</span><span class="p">,</span><span class="w"> </span><span class="mi">-4</span>
+<span class="w">        </span><span class="nf">neg</span><span class="w">     </span><span class="no">rdx</span>
+<span class="nl">.LBB2_3:</span>
+<span class="w">        </span><span class="nf">add</span><span class="w">     </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">*</span><span class="no">rsi</span><span class="w"> </span><span class="p">-</span><span class="w"> </span><span class="mi">8</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">*</span><span class="no">rsi</span><span class="p">],</span><span class="w"> </span><span class="no">eax</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">r8d</span><span class="p">,</span><span class="w"> </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">*</span><span class="no">rsi</span><span class="w"> </span><span class="p">-</span><span class="w"> </span><span class="mi">4</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">add</span><span class="w">     </span><span class="no">r8d</span><span class="p">,</span><span class="w"> </span><span class="no">eax</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">*</span><span class="no">rsi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">],</span><span class="w"> </span><span class="no">r8d</span>
+<span class="w">        </span><span class="nf">add</span><span class="w">     </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="no">r8d</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">*</span><span class="no">rsi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">8</span><span class="p">],</span><span class="w"> </span><span class="no">eax</span>
+<span class="w">        </span><span class="nf">add</span><span class="w">     </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="no">r8d</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">*</span><span class="no">rsi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">12</span><span class="p">],</span><span class="w"> </span><span class="no">eax</span>
+<span class="w">        </span><span class="nf">lea</span><span class="w">     </span><span class="no">r8</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">rdx</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="no">rsi</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">add</span><span class="w">     </span><span class="no">r8</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span>
+<span class="w">        </span><span class="nf">add</span><span class="w">     </span><span class="no">rsi</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span>
+<span class="w">        </span><span class="nf">cmp</span><span class="w">     </span><span class="no">r8</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span>
+<span class="w">        </span><span class="nf">jne</span><span class="w">     </span><span class="no">.LBB2_3</span>
+<span class="nl">.LBB2_4:</span>
+<span class="w">        </span><span class="nf">test</span><span class="w">    </span><span class="no">rcx</span><span class="p">,</span><span class="w"> </span><span class="no">rcx</span>
+<span class="w">        </span><span class="nf">je</span><span class="w">      </span><span class="no">.LBB2_7</span>
+<span class="w">        </span><span class="nf">lea</span><span class="w">     </span><span class="no">rdx</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">rdi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">*</span><span class="no">rsi</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">xor</span><span class="w">     </span><span class="no">esi</span><span class="p">,</span><span class="w"> </span><span class="no">esi</span>
+<span class="nl">.LBB2_6:</span>
+<span class="w">        </span><span class="nf">add</span><span class="w">     </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdx</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">*</span><span class="no">rsi</span><span class="w"> </span><span class="p">-</span><span class="w"> </span><span class="mi">8</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdx</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">*</span><span class="no">rsi</span><span class="p">],</span><span class="w"> </span><span class="no">eax</span>
+<span class="w">        </span><span class="nf">inc</span><span class="w">     </span><span class="no">rsi</span>
+<span class="w">        </span><span class="nf">cmp</span><span class="w">     </span><span class="no">rcx</span><span class="p">,</span><span class="w"> </span><span class="no">rsi</span>
+<span class="w">        </span><span class="nf">jne</span><span class="w">     </span><span class="no">.LBB2_6</span>
+<span class="nl">.LBB2_7:</span>
+<span class="w">        </span><span class="nf">ret</span>
+
+<span class="nf">clamp_array</span><span class="p">(</span><span class="no">float</span><span class="p">*,</span><span class="w"> </span><span class="no">int</span><span class="p">,</span><span class="w"> </span><span class="no">float</span><span class="p">,</span><span class="w"> </span><span class="no">float</span><span class="p">):</span>
+<span class="w">        </span><span class="nf">test</span><span class="w">    </span><span class="no">esi</span><span class="p">,</span><span class="w"> </span><span class="no">esi</span>
+<span class="w">        </span><span class="nf">jle</span><span class="w">     </span><span class="no">.LBB3_26</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="no">esi</span>
+<span class="w">        </span><span class="nf">cmp</span><span class="w">     </span><span class="no">esi</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span>
+<span class="w">        </span><span class="nf">ja</span><span class="w">      </span><span class="no">.LBB3_3</span>
+<span class="w">        </span><span class="nf">xor</span><span class="w">     </span><span class="no">ecx</span><span class="p">,</span><span class="w"> </span><span class="no">ecx</span>
+<span class="w">        </span><span class="nf">jmp</span><span class="w">     </span><span class="no">.LBB3_22</span>
+<span class="nl">.LBB3_3:</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">ecx</span><span class="p">,</span><span class="w"> </span><span class="no">eax</span>
+<span class="w">        </span><span class="nf">and</span><span class="w">     </span><span class="no">ecx</span><span class="p">,</span><span class="w"> </span><span class="mi">2147483640</span>
+<span class="w">        </span><span class="nf">movaps</span><span class="w">  </span><span class="no">xmm2</span><span class="p">,</span><span class="w"> </span><span class="no">xmm0</span>
+<span class="w">        </span><span class="nf">shufps</span><span class="w">  </span><span class="no">xmm2</span><span class="p">,</span><span class="w"> </span><span class="no">xmm0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">        </span><span class="nf">movaps</span><span class="w">  </span><span class="no">xmm3</span><span class="p">,</span><span class="w"> </span><span class="no">xmm1</span>
+<span class="w">        </span><span class="nf">shufps</span><span class="w">  </span><span class="no">xmm3</span><span class="p">,</span><span class="w"> </span><span class="no">xmm1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">edx</span><span class="p">,</span><span class="w"> </span><span class="no">eax</span>
+<span class="w">        </span><span class="nf">shr</span><span class="w">     </span><span class="no">edx</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span>
+<span class="w">        </span><span class="nf">and</span><span class="w">     </span><span class="no">edx</span><span class="p">,</span><span class="w"> </span><span class="mi">268435455</span>
+<span class="w">        </span><span class="nf">shl</span><span class="w">     </span><span class="no">rdx</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span>
+<span class="w">        </span><span class="nf">xor</span><span class="w">     </span><span class="no">esi</span><span class="p">,</span><span class="w"> </span><span class="no">esi</span>
+<span class="w">        </span><span class="nf">jmp</span><span class="w">     </span><span class="no">.LBB3_4</span>
+<span class="nl">.LBB3_20:</span>
+<span class="w">        </span><span class="nf">add</span><span class="w">     </span><span class="no">rsi</span><span class="p">,</span><span class="w"> </span><span class="mi">32</span>
+<span class="w">        </span><span class="nf">cmp</span><span class="w">     </span><span class="no">rdx</span><span class="p">,</span><span class="w"> </span><span class="no">rsi</span>
+<span class="w">        </span><span class="nf">je</span><span class="w">      </span><span class="no">.LBB3_21</span>
+<span class="nl">.LBB3_4:</span>
+<span class="w">        </span><span class="nf">movups</span><span class="w">  </span><span class="no">xmm6</span><span class="p">,</span><span class="w"> </span><span class="no">xmmword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="no">rsi</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">movaps</span><span class="w">  </span><span class="no">xmm4</span><span class="p">,</span><span class="w"> </span><span class="no">xmm2</span>
+<span class="w">        </span><span class="nf">cmpleps</span><span class="w"> </span><span class="no">xmm4</span><span class="p">,</span><span class="w"> </span><span class="no">xmm6</span>
+<span class="w">        </span><span class="nf">movaps</span><span class="w">  </span><span class="no">xmm5</span><span class="p">,</span><span class="w"> </span><span class="no">xmm3</span>
+<span class="w">        </span><span class="nf">cmpltps</span><span class="w"> </span><span class="no">xmm5</span><span class="p">,</span><span class="w"> </span><span class="no">xmm6</span>
+<span class="w">        </span><span class="nf">cmpltps</span><span class="w"> </span><span class="no">xmm6</span><span class="p">,</span><span class="w"> </span><span class="no">xmm2</span>
+<span class="w">        </span><span class="nf">andps</span><span class="w">   </span><span class="no">xmm4</span><span class="p">,</span><span class="w"> </span><span class="no">xmm5</span>
+<span class="w">        </span><span class="nf">pslld</span><span class="w">   </span><span class="no">xmm4</span><span class="p">,</span><span class="w"> </span><span class="mi">31</span>
+<span class="w">        </span><span class="nf">psrad</span><span class="w">   </span><span class="no">xmm4</span><span class="p">,</span><span class="w"> </span><span class="mi">31</span>
+<span class="w">        </span><span class="nf">orps</span><span class="w">    </span><span class="no">xmm5</span><span class="p">,</span><span class="w"> </span><span class="no">xmm6</span>
+<span class="w">        </span><span class="nf">movaps</span><span class="w">  </span><span class="no">xmm6</span><span class="p">,</span><span class="w"> </span><span class="no">xmm3</span>
+<span class="w">        </span><span class="nf">andps</span><span class="w">   </span><span class="no">xmm6</span><span class="p">,</span><span class="w"> </span><span class="no">xmm4</span>
+<span class="w">        </span><span class="nf">andnps</span><span class="w">  </span><span class="no">xmm4</span><span class="p">,</span><span class="w"> </span><span class="no">xmm2</span>
+<span class="w">        </span><span class="nf">orps</span><span class="w">    </span><span class="no">xmm4</span><span class="p">,</span><span class="w"> </span><span class="no">xmm6</span>
+<span class="w">        </span><span class="nf">movd</span><span class="w">    </span><span class="no">r8d</span><span class="p">,</span><span class="w"> </span><span class="no">xmm5</span>
+<span class="w">        </span><span class="nf">test</span><span class="w">    </span><span class="no">r8b</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">        </span><span class="nf">jne</span><span class="w">     </span><span class="no">.LBB3_5</span>
+<span class="w">        </span><span class="nf">pextrw</span><span class="w">  </span><span class="no">r8d</span><span class="p">,</span><span class="w"> </span><span class="no">xmm5</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span>
+<span class="w">        </span><span class="nf">test</span><span class="w">    </span><span class="no">r8b</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">        </span><span class="nf">jne</span><span class="w">     </span><span class="no">.LBB3_7</span>
+<span class="nl">.LBB3_8:</span>
+<span class="w">        </span><span class="nf">pextrw</span><span class="w">  </span><span class="no">r8d</span><span class="p">,</span><span class="w"> </span><span class="no">xmm5</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span>
+<span class="w">        </span><span class="nf">test</span><span class="w">    </span><span class="no">r8b</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">        </span><span class="nf">jne</span><span class="w">     </span><span class="no">.LBB3_9</span>
+<span class="nl">.LBB3_10:</span>
+<span class="w">        </span><span class="nf">pextrw</span><span class="w">  </span><span class="no">r8d</span><span class="p">,</span><span class="w"> </span><span class="no">xmm5</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span>
+<span class="w">        </span><span class="nf">test</span><span class="w">    </span><span class="no">r8b</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">        </span><span class="nf">je</span><span class="w">      </span><span class="no">.LBB3_12</span>
+<span class="nl">.LBB3_11:</span>
+<span class="w">        </span><span class="nf">shufps</span><span class="w">  </span><span class="no">xmm4</span><span class="p">,</span><span class="w"> </span><span class="no">xmm4</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span>
+<span class="w">        </span><span class="nf">movss</span><span class="w">   </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="no">rsi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">12</span><span class="p">],</span><span class="w"> </span><span class="no">xmm4</span>
+<span class="nl">.LBB3_12:</span>
+<span class="w">        </span><span class="nf">movups</span><span class="w">  </span><span class="no">xmm6</span><span class="p">,</span><span class="w"> </span><span class="no">xmmword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="no">rsi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">16</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">movaps</span><span class="w">  </span><span class="no">xmm4</span><span class="p">,</span><span class="w"> </span><span class="no">xmm2</span>
+<span class="w">        </span><span class="nf">cmpleps</span><span class="w"> </span><span class="no">xmm4</span><span class="p">,</span><span class="w"> </span><span class="no">xmm6</span>
+<span class="w">        </span><span class="nf">movaps</span><span class="w">  </span><span class="no">xmm5</span><span class="p">,</span><span class="w"> </span><span class="no">xmm3</span>
+<span class="w">        </span><span class="nf">cmpltps</span><span class="w"> </span><span class="no">xmm5</span><span class="p">,</span><span class="w"> </span><span class="no">xmm6</span>
+<span class="w">        </span><span class="nf">cmpltps</span><span class="w"> </span><span class="no">xmm6</span><span class="p">,</span><span class="w"> </span><span class="no">xmm2</span>
+<span class="w">        </span><span class="nf">andps</span><span class="w">   </span><span class="no">xmm4</span><span class="p">,</span><span class="w"> </span><span class="no">xmm5</span>
+<span class="w">        </span><span class="nf">pslld</span><span class="w">   </span><span class="no">xmm4</span><span class="p">,</span><span class="w"> </span><span class="mi">31</span>
+<span class="w">        </span><span class="nf">psrad</span><span class="w">   </span><span class="no">xmm4</span><span class="p">,</span><span class="w"> </span><span class="mi">31</span>
+<span class="w">        </span><span class="nf">orps</span><span class="w">    </span><span class="no">xmm5</span><span class="p">,</span><span class="w"> </span><span class="no">xmm6</span>
+<span class="w">        </span><span class="nf">movaps</span><span class="w">  </span><span class="no">xmm6</span><span class="p">,</span><span class="w"> </span><span class="no">xmm3</span>
+<span class="w">        </span><span class="nf">andps</span><span class="w">   </span><span class="no">xmm6</span><span class="p">,</span><span class="w"> </span><span class="no">xmm4</span>
+<span class="w">        </span><span class="nf">andnps</span><span class="w">  </span><span class="no">xmm4</span><span class="p">,</span><span class="w"> </span><span class="no">xmm2</span>
+<span class="w">        </span><span class="nf">orps</span><span class="w">    </span><span class="no">xmm4</span><span class="p">,</span><span class="w"> </span><span class="no">xmm6</span>
+<span class="w">        </span><span class="nf">movd</span><span class="w">    </span><span class="no">r8d</span><span class="p">,</span><span class="w"> </span><span class="no">xmm5</span>
+<span class="w">        </span><span class="nf">test</span><span class="w">    </span><span class="no">r8b</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">        </span><span class="nf">jne</span><span class="w">     </span><span class="no">.LBB3_13</span>
+<span class="w">        </span><span class="nf">pextrw</span><span class="w">  </span><span class="no">r8d</span><span class="p">,</span><span class="w"> </span><span class="no">xmm5</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span>
+<span class="w">        </span><span class="nf">test</span><span class="w">    </span><span class="no">r8b</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">        </span><span class="nf">jne</span><span class="w">     </span><span class="no">.LBB3_15</span>
+<span class="nl">.LBB3_16:</span>
+<span class="w">        </span><span class="nf">pextrw</span><span class="w">  </span><span class="no">r8d</span><span class="p">,</span><span class="w"> </span><span class="no">xmm5</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span>
+<span class="w">        </span><span class="nf">test</span><span class="w">    </span><span class="no">r8b</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">        </span><span class="nf">jne</span><span class="w">     </span><span class="no">.LBB3_17</span>
+<span class="nl">.LBB3_18:</span>
+<span class="w">        </span><span class="nf">pextrw</span><span class="w">  </span><span class="no">r8d</span><span class="p">,</span><span class="w"> </span><span class="no">xmm5</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span>
+<span class="w">        </span><span class="nf">test</span><span class="w">    </span><span class="no">r8b</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">        </span><span class="nf">je</span><span class="w">      </span><span class="no">.LBB3_20</span>
+<span class="w">        </span><span class="nf">jmp</span><span class="w">     </span><span class="no">.LBB3_19</span>
+<span class="nl">.LBB3_5:</span>
+<span class="w">        </span><span class="nf">movss</span><span class="w">   </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="no">rsi</span><span class="p">],</span><span class="w"> </span><span class="no">xmm4</span>
+<span class="w">        </span><span class="nf">pextrw</span><span class="w">  </span><span class="no">r8d</span><span class="p">,</span><span class="w"> </span><span class="no">xmm5</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span>
+<span class="w">        </span><span class="nf">test</span><span class="w">    </span><span class="no">r8b</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">        </span><span class="nf">je</span><span class="w">      </span><span class="no">.LBB3_8</span>
+<span class="nl">.LBB3_7:</span>
+<span class="w">        </span><span class="nf">movaps</span><span class="w">  </span><span class="no">xmm6</span><span class="p">,</span><span class="w"> </span><span class="no">xmm4</span>
+<span class="w">        </span><span class="nf">shufps</span><span class="w">  </span><span class="no">xmm6</span><span class="p">,</span><span class="w"> </span><span class="no">xmm4</span><span class="p">,</span><span class="w"> </span><span class="mi">85</span>
+<span class="w">        </span><span class="nf">movss</span><span class="w">   </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="no">rsi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">],</span><span class="w"> </span><span class="no">xmm6</span>
+<span class="w">        </span><span class="nf">pextrw</span><span class="w">  </span><span class="no">r8d</span><span class="p">,</span><span class="w"> </span><span class="no">xmm5</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span>
+<span class="w">        </span><span class="nf">test</span><span class="w">    </span><span class="no">r8b</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">        </span><span class="nf">je</span><span class="w">      </span><span class="no">.LBB3_10</span>
+<span class="nl">.LBB3_9:</span>
+<span class="w">        </span><span class="nf">movaps</span><span class="w">  </span><span class="no">xmm6</span><span class="p">,</span><span class="w"> </span><span class="no">xmm4</span>
+<span class="w">        </span><span class="nf">unpckhpd</span><span class="w">        </span><span class="no">xmm6</span><span class="p">,</span><span class="w"> </span><span class="no">xmm4</span>
+<span class="w">        </span><span class="nf">movss</span><span class="w">   </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="no">rsi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">8</span><span class="p">],</span><span class="w"> </span><span class="no">xmm6</span>
+<span class="w">        </span><span class="nf">pextrw</span><span class="w">  </span><span class="no">r8d</span><span class="p">,</span><span class="w"> </span><span class="no">xmm5</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span>
+<span class="w">        </span><span class="nf">test</span><span class="w">    </span><span class="no">r8b</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">        </span><span class="nf">jne</span><span class="w">     </span><span class="no">.LBB3_11</span>
+<span class="w">        </span><span class="nf">jmp</span><span class="w">     </span><span class="no">.LBB3_12</span>
+<span class="nl">.LBB3_13:</span>
+<span class="w">        </span><span class="nf">movss</span><span class="w">   </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="no">rsi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">16</span><span class="p">],</span><span class="w"> </span><span class="no">xmm4</span>
+<span class="w">        </span><span class="nf">pextrw</span><span class="w">  </span><span class="no">r8d</span><span class="p">,</span><span class="w"> </span><span class="no">xmm5</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span>
+<span class="w">        </span><span class="nf">test</span><span class="w">    </span><span class="no">r8b</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">        </span><span class="nf">je</span><span class="w">      </span><span class="no">.LBB3_16</span>
+<span class="nl">.LBB3_15:</span>
+<span class="w">        </span><span class="nf">movaps</span><span class="w">  </span><span class="no">xmm6</span><span class="p">,</span><span class="w"> </span><span class="no">xmm4</span>
+<span class="w">        </span><span class="nf">shufps</span><span class="w">  </span><span class="no">xmm6</span><span class="p">,</span><span class="w"> </span><span class="no">xmm4</span><span class="p">,</span><span class="w"> </span><span class="mi">85</span>
+<span class="w">        </span><span class="nf">movss</span><span class="w">   </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="no">rsi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">20</span><span class="p">],</span><span class="w"> </span><span class="no">xmm6</span>
+<span class="w">        </span><span class="nf">pextrw</span><span class="w">  </span><span class="no">r8d</span><span class="p">,</span><span class="w"> </span><span class="no">xmm5</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span>
+<span class="w">        </span><span class="nf">test</span><span class="w">    </span><span class="no">r8b</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">        </span><span class="nf">je</span><span class="w">      </span><span class="no">.LBB3_18</span>
+<span class="nl">.LBB3_17:</span>
+<span class="w">        </span><span class="nf">movaps</span><span class="w">  </span><span class="no">xmm6</span><span class="p">,</span><span class="w"> </span><span class="no">xmm4</span>
+<span class="w">        </span><span class="nf">unpckhpd</span><span class="w">        </span><span class="no">xmm6</span><span class="p">,</span><span class="w"> </span><span class="no">xmm4</span>
+<span class="w">        </span><span class="nf">movss</span><span class="w">   </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="no">rsi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">24</span><span class="p">],</span><span class="w"> </span><span class="no">xmm6</span>
+<span class="w">        </span><span class="nf">pextrw</span><span class="w">  </span><span class="no">r8d</span><span class="p">,</span><span class="w"> </span><span class="no">xmm5</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span>
+<span class="w">        </span><span class="nf">test</span><span class="w">    </span><span class="no">r8b</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">        </span><span class="nf">je</span><span class="w">      </span><span class="no">.LBB3_20</span>
+<span class="nl">.LBB3_19:</span>
+<span class="w">        </span><span class="nf">shufps</span><span class="w">  </span><span class="no">xmm4</span><span class="p">,</span><span class="w"> </span><span class="no">xmm4</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span>
+<span class="w">        </span><span class="nf">movss</span><span class="w">   </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="no">rsi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">28</span><span class="p">],</span><span class="w"> </span><span class="no">xmm4</span>
+<span class="w">        </span><span class="nf">jmp</span><span class="w">     </span><span class="no">.LBB3_20</span>
+<span class="nl">.LBB3_21:</span>
+<span class="w">        </span><span class="nf">cmp</span><span class="w">     </span><span class="no">ecx</span><span class="p">,</span><span class="w"> </span><span class="no">eax</span>
+<span class="w">        </span><span class="nf">jne</span><span class="w">     </span><span class="no">.LBB3_22</span>
+<span class="nl">.LBB3_26:</span>
+<span class="w">        </span><span class="nf">ret</span>
+<span class="nl">.LBB3_24:</span>
+<span class="w">        </span><span class="nf">movss</span><span class="w">   </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">*</span><span class="no">rcx</span><span class="p">],</span><span class="w"> </span><span class="no">xmm2</span>
+<span class="nl">.LBB3_25:</span>
+<span class="w">        </span><span class="nf">inc</span><span class="w">     </span><span class="no">rcx</span>
+<span class="w">        </span><span class="nf">cmp</span><span class="w">     </span><span class="no">rax</span><span class="p">,</span><span class="w"> </span><span class="no">rcx</span>
+<span class="w">        </span><span class="nf">je</span><span class="w">      </span><span class="no">.LBB3_26</span>
+<span class="nl">.LBB3_22:</span>
+<span class="w">        </span><span class="nf">movss</span><span class="w">   </span><span class="no">xmm3</span><span class="p">,</span><span class="w"> </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rdi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">*</span><span class="no">rcx</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">ucomiss</span><span class="w"> </span><span class="no">xmm0</span><span class="p">,</span><span class="w"> </span><span class="no">xmm3</span>
+<span class="w">        </span><span class="nf">movaps</span><span class="w">  </span><span class="no">xmm2</span><span class="p">,</span><span class="w"> </span><span class="no">xmm0</span>
+<span class="w">        </span><span class="nf">ja</span><span class="w">      </span><span class="no">.LBB3_24</span>
+<span class="w">        </span><span class="nf">ucomiss</span><span class="w"> </span><span class="no">xmm3</span><span class="p">,</span><span class="w"> </span><span class="no">xmm1</span>
+<span class="w">        </span><span class="nf">movaps</span><span class="w">  </span><span class="no">xmm2</span><span class="p">,</span><span class="w"> </span><span class="no">xmm1</span>
+<span class="w">        </span><span class="nf">ja</span><span class="w">      </span><span class="no">.LBB3_24</span>
+<span class="w">        </span><span class="nf">jmp</span><span class="w">     </span><span class="no">.LBB3_25</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="explanation">Explanation<a class="headerlink" href="#explanation" title="Permanent link">&para;</a></h2>
+<p>the key insight is that <strong>the compiler applied different optimization strategies to each function based on whether vectorization was possible</strong>.</p>
+<h3 id="the-core-pattern-vectorization-opportunities">The Core Pattern: Vectorization Opportunities<a class="headerlink" href="#the-core-pattern-vectorization-opportunities" title="Permanent link">&para;</a></h3>
+<p>The <code>-Ofast</code> flag tells the compiler to prioritize speed, including aggressive auto-vectorization (converting scalar loops into SIMD operations that process multiple elements simultaneously). However, <strong>not all loops can be vectorized</strong>—it depends on data dependencies.</p>
+<h3 id="function-by-function-analysis">Function-by-Function Analysis<a class="headerlink" href="#function-by-function-analysis" title="Permanent link">&para;</a></h3>
+<h4 id="add_arrays-vectorized-simd-operations"><code>add_arrays</code>: Vectorized (SIMD operations)<a class="headerlink" href="#add_arrays-vectorized-simd-operations" title="Permanent link">&para;</a></h4>
+<p>The visible assembly shows the function uses vector instructions (the omitted 71 lines contain the SIMD loop). This makes sense because:
+- Each <code>dst[i] = a[i] + b[i]</code> is <strong>independent</strong>—computing element 0 doesn't depend on element 1
+- The compiler can load 4-8 floats at once into vector registers (like <code>xmm0</code>), add them in parallel, and store results back
+- This is the ideal vectorization candidate</p>
+<p>The control flow at the end (<code>cmp r8, r9</code>, <code>jne .LBB0_10</code>) handles the <strong>scalar cleanup loop</strong>—after processing elements in chunks of 4 or 8, any remaining elements (if <code>n</code> isn't evenly divisible) are handled one at a time.</p>
+<h4 id="sum_array-partially-vectorized-with-scalar-fallback"><code>sum_array</code>: Partially Vectorized with Scalar Fallback<a class="headerlink" href="#sum_array-partially-vectorized-with-scalar-fallback" title="Permanent link">&para;</a></h4>
+<p>The visible code shows:
+<div class="highlight"><pre><span></span><code>xorps   xmm0, xmm0          # Initialize vector register to 0.0
+...
+addss   xmm0, dword ptr [rdi + 4*rcx]  # Add single float
+inc     rcx
+cmp     rax, rcx
+jne     .LBB1_7             # Loop back
+</code></pre></div></p>
+<p>This is <strong>scalar code</strong> (single-element operations), not vectorized. Why? Reductions (summing all elements) are tricky to vectorize because:
+- You need to add element 0 to element 1, then add that result to element 2, etc.
+- This creates a <strong>dependency chain</strong>—each step depends on the previous result
+- The omitted 26 lines likely contain a vectorized version that processes multiple partial sums in parallel, then combines them at the end</p>
+<p>The <code>addss</code> instruction adds a single scalar float to <code>xmm0</code>. The loop counter increments by 1 each iteration, processing one element per loop cycle.</p>
+<h4 id="fibonacci_array-not-vectorized-serial-loop"><code>fibonacci_array</code>: Not Vectorized (Serial Loop)<a class="headerlink" href="#fibonacci_array-not-vectorized-serial-loop" title="Permanent link">&para;</a></h4>
+<p>The visible code shows:
+<div class="highlight"><pre><span></span><code>mov     dword ptr [rdx + 4*rsi], eax  # Store result
+inc     rsi                            # Next index
+cmp     rcx, rsi
+jne     .LBB2_6                        # Loop back
+</code></pre></div></p>
+<p>This is <strong>pure scalar code</strong>—one element per iteration. The Fibonacci sequence <strong>cannot be vectorized</strong> because:
+- <code>arr[i] = arr[i-1] + arr[i-2]</code> means each element depends on the two previous elements
+- You can't compute <code>arr[5]</code> until you've computed <code>arr[4]</code> and <code>arr[3]</code>
+- This is a fundamental data dependency that prevents parallel processing</p>
+<p>The compiler has no choice but to execute this serially.</p>
+<h4 id="clamp_array-vectorized-with-masking"><code>clamp_array</code>: Vectorized with Masking<a class="headerlink" href="#clamp_array-vectorized-with-masking" title="Permanent link">&para;</a></h4>
+<p>The omitted 128 lines contain the complex logic. The visible code shows conditional branches (<code>jne .LBB3_22</code>), which suggests the compiler used <strong>masked vector operations</strong>:
+- Load multiple floats into a vector register
+- Compare all of them against <code>min</code> and <code>max</code> simultaneously
+- Use a mask to selectively update only the elements that need clamping
+- This avoids the branch misprediction penalty of checking each element individually</p>
+<h3 id="key-observations">Key Observations<a class="headerlink" href="#key-observations" title="Permanent link">&para;</a></h3>
+<p><strong>Vectorization requires independence</strong>: The compiler can only vectorize loops where iterations don't depend on each other. <code>add_arrays</code> ✓, <code>sum_array</code> (partially) ✓, <code>fibonacci_array</code> ✗, <code>clamp_array</code> ✓.</p>
+<p><strong>Scalar cleanup is necessary</strong>: When array size isn't a multiple of the vector width (4 or 8 floats), the remaining elements are processed one at a time in a scalar loop.</p>
+<p><strong>Register usage</strong>: <code>xmm0</code>, <code>xmm1</code>, etc. are vector registers (128-bit, holding 4 floats). The <code>addss</code> instruction operates on a single scalar float within a vector register.</p>
+<hr />
+<p><a href="../../">← Back to clang1910</a></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../../..", "features": ["content.code.copy", "navigation.sections", "navigation.indexes", "navigation.top", "toc.follow"], "search": "../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

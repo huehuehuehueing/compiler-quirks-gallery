@@ -1,0 +1,2957 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../../assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>padding-leak - Compiler Optimization Gallery</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../custom.css">
+    
+    <script>__md_scope=new URL("../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#padding-leak" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../../.." title="Compiler Optimization Gallery" class="md-header__button md-logo" aria-label="Compiler Optimization Gallery" data-md-component="logo">
+      
+  <img src="../../../../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Compiler Optimization Gallery
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              padding-leak
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../.." title="Compiler Optimization Gallery" class="md-nav__button md-logo" aria-label="Compiler Optimization Gallery" data-md-component="logo">
+      
+  <img src="../../../../assets/logo.png" alt="logo">
+
+    </a>
+    Compiler Optimization Gallery
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../compilers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compilers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../../O0/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    O0 - No Optimization
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    O0 - No Optimization
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O0/armv7-clang2110/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    armv7-clang2110
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O0/armv8-clang2110/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    armv8-clang2110
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O0/avrg1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    avrg1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O0/cg152/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    cg152
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O0/clang1910/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    clang1910
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O0/cmingw64_ucrt_gcc_1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    cmingw64_ucrt_gcc_1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O0/csparc64g1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    csparc64g1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O0/csparcg1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    csparcg1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O0/mipsg1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    mipsg1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O0/vc_v19_44_VS17_14_x64/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vc_v19_44_VS17_14_x64
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O0/vc_v19_44_VS17_14_x86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vc_v19_44_VS17_14_x86
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../../O2/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    O2 - Standard Optimization
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    O2 - Standard Optimization
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O2/armv7-clang2110/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    armv7-clang2110
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O2/armv8-clang2110/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    armv8-clang2110
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O2/avrg1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    avrg1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O2/cg152/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    cg152
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O2/clang1910/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    clang1910
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O2/cmingw64_ucrt_gcc_1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    cmingw64_ucrt_gcc_1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O2/csparc64g1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    csparc64g1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O2/csparcg1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    csparcg1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O2/mipsg1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    mipsg1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O2/vc_v19_44_VS17_14_x64/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vc_v19_44_VS17_14_x64
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../O2/vc_v19_44_VS17_14_x86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vc_v19_44_VS17_14_x86
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    O3 - Aggressive Optimization
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_5" id="__nav_5_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    O3 - Aggressive Optimization
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    armv7-clang2110
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../armv8-clang2110/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    armv8-clang2110
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../avrg1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    avrg1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cg152/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    cg152
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../clang1910/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    clang1910
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cmingw64_ucrt_gcc_1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    cmingw64_ucrt_gcc_1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../csparc64g1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    csparc64g1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../csparcg1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    csparcg1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../mipsg1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    mipsg1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../vc_v19_44_VS17_14_x64/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vc_v19_44_VS17_14_x64
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../vc_v19_44_VS17_14_x86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vc_v19_44_VS17_14_x86
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../../Ofast/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ofast - Fast Math Optimization
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_6" id="__nav_6_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Ofast - Fast Math Optimization
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../Ofast/armv7-clang2110/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    armv7-clang2110
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../Ofast/armv8-clang2110/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    armv8-clang2110
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../Ofast/avrg1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    avrg1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../Ofast/cg152/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    cg152
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../Ofast/clang1910/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    clang1910
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../Ofast/cmingw64_ucrt_gcc_1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    cmingw64_ucrt_gcc_1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../Ofast/csparc64g1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    csparc64g1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../Ofast/csparcg1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    csparcg1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../Ofast/mipsg1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    mipsg1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../Ofast/vc_v19_44_VS17_14_x64/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vc_v19_44_VS17_14_x64
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../Ofast/vc_v19_44_VS17_14_x86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vc_v19_44_VS17_14_x86
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../../Os/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Os - Size Optimization
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_7" id="__nav_7_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Os - Size Optimization
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../Os/armv7-clang2110/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    armv7-clang2110
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../Os/armv8-clang2110/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    armv8-clang2110
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../Os/avrg1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    avrg1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../Os/cg152/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    cg152
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../Os/clang1910/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    clang1910
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../Os/cmingw64_ucrt_gcc_1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    cmingw64_ucrt_gcc_1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../Os/csparc64g1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    csparc64g1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../Os/csparcg1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    csparcg1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../Os/mipsg1520/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    mipsg1520
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../Os/vc_v19_44_VS17_14_x64/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vc_v19_44_VS17_14_x64
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../Os/vc_v19_44_VS17_14_x86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vc_v19_44_VS17_14_x86
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#source-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Source Code
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#assembly-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Assembly Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#explanation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Explanation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Explanation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-core-problem-uninitialized-memory-leaks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Core Problem: Uninitialized Memory Leaks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#function-by-function-breakdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Function-by-Function Breakdown
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Function-by-Function Breakdown">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#handle_login-the-simplest-case" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        handle_login — The Simplest Case
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#send_user_record-the-vulnerable-struct" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        send_user_record — The Vulnerable Struct
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#send_user_record_safe-the-fix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        send_user_record_safe — The Fix
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decrypt_message-stack-allocation-without-cleanup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        decrypt_message — Stack Allocation Without Cleanup
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="padding-leak">padding-leak<a class="headerlink" href="#padding-leak" title="Permanent link">&para;</a></h1>
+<div class="admonition info">
+<p class="admonition-title">Details</p>
+<p><strong>Source:</strong> <code>security/padding-leak.c</code>
+<strong>Compiler:</strong> armv7-clang2110 (ARM)
+<strong>Scenario:</strong> O3 - Aggressive Optimization (<code>-O3</code>)</p>
+</div>
+<h2 id="source-code">Source Code<a class="headerlink" href="#source-code" title="Permanent link">&para;</a></h2>
+<div class="highlight"><span class="filename">padding-leak.c</span><pre><span></span><code><span class="cm">/*</span>
+<span class="cm"> * Compiler-assisted information disclosure via struct padding</span>
+<span class="cm"> * and stack slot reuse.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Two realistic scenarios where compiler behavior causes sensitive</span>
+<span class="cm"> * data to leak over the network:</span>
+<span class="cm"> *</span>
+<span class="cm"> *   1. Struct padding: a struct with poor field ordering has</span>
+<span class="cm"> *      uninitialized padding bytes.  Assigning fields individually</span>
+<span class="cm"> *      does NOT clear the gaps.  When the struct is sent as raw</span>
+<span class="cm"> *      bytes, the padding carries whatever was on the stack before</span>
+<span class="cm"> *      -- potentially secrets from a prior function call.</span>
+<span class="cm"> *</span>
+<span class="cm"> *   2. Stack reuse: the compiler reuses the same stack slot for</span>
+<span class="cm"> *      locals in successive function calls.  If the second function</span>
+<span class="cm"> *      only partially initializes its buffer before sending it,</span>
+<span class="cm"> *      the tail still holds the first function&#39;s secret.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Both vectors are invisible in the source code and only appear</span>
+<span class="cm"> * when examining the compiled output.  The optimizer at -O2+</span>
+<span class="cm"> * makes stack reuse more aggressive, widening the window.</span>
+<span class="cm"> */</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;string.h&gt;</span>
+
+<span class="cm">/* Opaque network send -- compiler cannot see through this,</span>
+<span class="cm"> * so it cannot remove the call or reason about the buffer contents.</span>
+<span class="cm"> * In a real program this would be send(fd, buf, len, 0).</span>
+<span class="cm"> */</span>
+<span class="k">extern</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">transmit</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">buf</span><span class="p">,</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">len</span><span class="p">);</span>
+
+
+<span class="cm">/* ================================================================</span>
+<span class="cm"> * Example 1 — Struct padding leaks secret data</span>
+<span class="cm"> * ================================================================</span>
+<span class="cm"> *</span>
+<span class="cm"> * bad_record has 6 bytes of padding due to alignment requirements:</span>
+<span class="cm"> *</span>
+<span class="cm"> *   Offset  Field/Padding</span>
+<span class="cm"> *   ------  -------------</span>
+<span class="cm"> *     0     role      (1 byte)</span>
+<span class="cm"> *     1-3   PADDING   (3 bytes) -- never written!</span>
+<span class="cm"> *     4-7   uid       (4 bytes)</span>
+<span class="cm"> *     8     active    (1 byte)</span>
+<span class="cm"> *     9-11  PADDING   (3 bytes) -- never written!</span>
+<span class="cm"> *    12-15  gid       (4 bytes)</span>
+<span class="cm"> *</span>
+<span class="cm"> *   sizeof(bad_record) == 16, but only 10 bytes are meaningful.</span>
+<span class="cm"> *   The 6 padding bytes contain whatever was on the stack.</span>
+<span class="cm"> */</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">bad_record</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">char</span><span class="w">  </span><span class="n">role</span><span class="p">;</span><span class="w">       </span><span class="cm">/* 1 byte  + 3 padding */</span>
+<span class="w">    </span><span class="kt">int</span><span class="w">   </span><span class="n">uid</span><span class="p">;</span><span class="w">        </span><span class="cm">/* 4 bytes             */</span>
+<span class="w">    </span><span class="kt">char</span><span class="w">  </span><span class="n">active</span><span class="p">;</span><span class="w">     </span><span class="cm">/* 1 byte  + 3 padding */</span>
+<span class="w">    </span><span class="kt">int</span><span class="w">   </span><span class="n">gid</span><span class="p">;</span><span class="w">        </span><span class="cm">/* 4 bytes             */</span>
+<span class="p">};</span><span class="w">  </span><span class="cm">/* Total: 16 bytes, 6 bytes wasted as uninitialized padding */</span>
+
+<span class="cm">/*</span>
+<span class="cm"> * handle_login: processes a password into a stack-local buffer,</span>
+<span class="cm"> * then returns.  The password bytes remain on the stack.</span>
+<span class="cm"> */</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">handle_login</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">password</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">secret_buf</span><span class="p">[</span><span class="mi">64</span><span class="p">];</span>
+<span class="w">    </span><span class="n">strncpy</span><span class="p">(</span><span class="n">secret_buf</span><span class="p">,</span><span class="w"> </span><span class="n">password</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">secret_buf</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">    </span><span class="n">secret_buf</span><span class="p">[</span><span class="k">sizeof</span><span class="p">(</span><span class="n">secret_buf</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sc">&#39;\0&#39;</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* ... authenticate ... (uses secret_buf) */</span>
+<span class="w">    </span><span class="cm">/* The compiler considers secret_buf dead after this point.</span>
+<span class="cm">     * No memset_s or explicit_bzero -- a common oversight.</span>
+<span class="cm">     * The password bytes stay on the stack.</span>
+<span class="cm">     */</span>
+<span class="p">}</span>
+
+<span class="cm">/*</span>
+<span class="cm"> * send_user_record: fills a bad_record field-by-field and transmits it.</span>
+<span class="cm"> *</span>
+<span class="cm"> * BUG: Field-by-field assignment does NOT touch the 6 padding bytes.</span>
+<span class="cm"> * If this function&#39;s stack frame overlaps with handle_login&#39;s</span>
+<span class="cm"> * (due to stack slot reuse), the padding bytes may still contain</span>
+<span class="cm"> * fragments of the password.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Compare the assembly at -O0 vs -O2: at -O2 the compiler may</span>
+<span class="cm"> * place the struct in the same stack region as the prior call&#39;s</span>
+<span class="cm"> * secret_buf, and there is no zeroing of the padding gaps.</span>
+<span class="cm"> */</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">send_user_record</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">uid</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">gid</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="n">role</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="n">active</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">bad_record</span><span class="w"> </span><span class="n">rec</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Each assignment writes only the field, not the padding */</span>
+<span class="w">    </span><span class="n">rec</span><span class="p">.</span><span class="n">role</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="n">role</span><span class="p">;</span>
+<span class="w">    </span><span class="n">rec</span><span class="p">.</span><span class="n">uid</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="n">uid</span><span class="p">;</span>
+<span class="w">    </span><span class="n">rec</span><span class="p">.</span><span class="n">active</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">active</span><span class="p">;</span>
+<span class="w">    </span><span class="n">rec</span><span class="p">.</span><span class="n">gid</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="n">gid</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Sends all 16 bytes including 6 bytes of uninitialized padding.</span>
+<span class="cm">     * Those padding bytes may contain password fragments.</span>
+<span class="cm">     */</span>
+<span class="w">    </span><span class="n">transmit</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rec</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">rec</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="cm">/*</span>
+<span class="cm"> * send_user_record_safe: zeroes the struct first, then assigns fields.</span>
+<span class="cm"> *</span>
+<span class="cm"> * FIX: memset clears the entire 16 bytes (including padding) before</span>
+<span class="cm"> * any field assignment.  The padding bytes are now guaranteed to be 0.</span>
+<span class="cm"> */</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">send_user_record_safe</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">uid</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">gid</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="n">role</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="n">active</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">bad_record</span><span class="w"> </span><span class="n">rec</span><span class="p">;</span>
+<span class="w">    </span><span class="n">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rec</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">rec</span><span class="p">));</span><span class="w">   </span><span class="cm">/* clears padding too */</span>
+
+<span class="w">    </span><span class="n">rec</span><span class="p">.</span><span class="n">role</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="n">role</span><span class="p">;</span>
+<span class="w">    </span><span class="n">rec</span><span class="p">.</span><span class="n">uid</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="n">uid</span><span class="p">;</span>
+<span class="w">    </span><span class="n">rec</span><span class="p">.</span><span class="n">active</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">active</span><span class="p">;</span>
+<span class="w">    </span><span class="n">rec</span><span class="p">.</span><span class="n">gid</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="n">gid</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">transmit</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rec</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">rec</span><span class="p">));</span>
+<span class="p">}</span>
+
+
+<span class="cm">/* ================================================================</span>
+<span class="cm"> * Example 2 — Stack reuse leaks prior function&#39;s secret</span>
+<span class="cm"> * ================================================================</span>
+<span class="cm"> *</span>
+<span class="cm"> * decrypt_message writes a secret into a 128-byte local buffer.</span>
+<span class="cm"> * log_network_event gets a 128-byte local buffer at the same</span>
+<span class="cm"> * stack address (reuse), but only writes a short prefix into it</span>
+<span class="cm"> * before sending the full 128 bytes over the network.</span>
+<span class="cm"> *</span>
+<span class="cm"> * The tail of the buffer still contains the decrypted plaintext.</span>
+<span class="cm"> */</span>
+
+<span class="cm">/* Opaque source of encrypted data -- compiler cannot inline this */</span>
+<span class="k">extern</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="nf">read_encrypted</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">dst</span><span class="p">,</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">max_len</span><span class="p">);</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">decrypt_message</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">key</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">plaintext</span><span class="p">[</span><span class="mi">128</span><span class="p">];</span>
+<span class="w">    </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">len</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">read_encrypted</span><span class="p">(</span><span class="n">plaintext</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">plaintext</span><span class="p">));</span>
+
+<span class="w">    </span><span class="cm">/* ... process the decrypted plaintext ... */</span>
+<span class="w">    </span><span class="cm">/* len bytes of secret data sit in plaintext[0..len-1].</span>
+<span class="cm">     * When this function returns, those bytes remain on the stack.</span>
+<span class="cm">     */</span>
+<span class="w">    </span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">len</span><span class="p">;</span>
+<span class="w">    </span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">key</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="cm">/*</span>
+<span class="cm"> * log_network_event: writes a short tag into a local buffer, then</span>
+<span class="cm"> * sends the entire buffer to the network.</span>
+<span class="cm"> *</span>
+<span class="cm"> * BUG: Only the first ~14 bytes are initialized (&quot;EVENT: ping\n&quot;).</span>
+<span class="cm"> * The remaining ~114 bytes are whatever the compiler left in that</span>
+<span class="cm"> * stack slot -- which is decrypt_message&#39;s plaintext if the compiler</span>
+<span class="cm"> * reused the slot.</span>
+<span class="cm"> *</span>
+<span class="cm"> * At -O2+ the compiler aggressively reuses stack slots for locals</span>
+<span class="cm"> * with non-overlapping lifetimes, making this overlap very likely.</span>
+<span class="cm"> */</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">log_network_event</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">tag</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">logbuf</span><span class="p">[</span><span class="mi">128</span><span class="p">];</span>
+
+<span class="w">    </span><span class="cm">/* Partial initialization -- only writes a few bytes */</span>
+<span class="w">    </span><span class="n">memcpy</span><span class="p">(</span><span class="n">logbuf</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;EVENT: &quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">);</span>
+<span class="w">    </span><span class="n">strncpy</span><span class="p">(</span><span class="n">logbuf</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="n">tag</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">logbuf</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">8</span><span class="p">);</span>
+<span class="w">    </span><span class="n">logbuf</span><span class="p">[</span><span class="k">sizeof</span><span class="p">(</span><span class="n">logbuf</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sc">&#39;\0&#39;</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Sends ALL 128 bytes, including ~114 uninitialized tail bytes</span>
+<span class="cm">     * that may still hold the decrypted secret from decrypt_message.</span>
+<span class="cm">     */</span>
+<span class="w">    </span><span class="n">transmit</span><span class="p">(</span><span class="n">logbuf</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">logbuf</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="cm">/*</span>
+<span class="cm"> * log_network_event_safe: initializes the full buffer before use.</span>
+<span class="cm"> *</span>
+<span class="cm"> * FIX: memset the entire buffer to zero before writing the tag.</span>
+<span class="cm"> * The tail bytes are now guaranteed to be 0, not prior secrets.</span>
+<span class="cm"> */</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">log_network_event_safe</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">tag</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">logbuf</span><span class="p">[</span><span class="mi">128</span><span class="p">];</span>
+<span class="w">    </span><span class="n">memset</span><span class="p">(</span><span class="n">logbuf</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">logbuf</span><span class="p">));</span>
+
+<span class="w">    </span><span class="n">memcpy</span><span class="p">(</span><span class="n">logbuf</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;EVENT: &quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">);</span>
+<span class="w">    </span><span class="n">strncpy</span><span class="p">(</span><span class="n">logbuf</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="n">tag</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">logbuf</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">8</span><span class="p">);</span>
+<span class="w">    </span><span class="n">logbuf</span><span class="p">[</span><span class="k">sizeof</span><span class="p">(</span><span class="n">logbuf</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sc">&#39;\0&#39;</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">transmit</span><span class="p">(</span><span class="n">logbuf</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">logbuf</span><span class="p">));</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="assembly-output">Assembly Output<a class="headerlink" href="#assembly-output" title="Permanent link">&para;</a></h2>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">padding-leak.asm</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span>
+<span class="normal">88</span>
+<span class="normal">89</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nf">handle_login</span><span class="p">(</span><span class="no">char</span><span class="w"> </span><span class="no">const</span><span class="p">*):</span>
+<span class="w">        </span><span class="nf">bx</span><span class="w">      </span><span class="no">lr</span>
+
+<span class="nf">send_user_record</span><span class="p">(</span><span class="no">int</span><span class="p">,</span><span class="w"> </span><span class="no">int</span><span class="p">,</span><span class="w"> </span><span class="no">char</span><span class="p">,</span><span class="w"> </span><span class="no">char</span><span class="p">):</span>
+<span class="w">        </span><span class="nf">push</span><span class="w">    </span><span class="p">{</span><span class="no">r11</span><span class="p">,</span><span class="w"> </span><span class="no">lr</span><span class="p">}</span>
+<span class="w">        </span><span class="nf">sub</span><span class="w">     </span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="mi">#16</span>
+<span class="w">        </span><span class="nf">str</span><span class="w">     </span><span class="no">r1</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="mi">#12</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">str</span><span class="w">     </span><span class="no">r0</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="mi">#4</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">r0</span><span class="p">,</span><span class="w"> </span><span class="no">sp</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">r1</span><span class="p">,</span><span class="w"> </span><span class="mi">#16</span>
+<span class="w">        </span><span class="nf">strb</span><span class="w">    </span><span class="no">r3</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="mi">#8</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">strb</span><span class="w">    </span><span class="no">r2</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">sp</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">bl</span><span class="w">      </span><span class="no">transmit</span><span class="p">(</span><span class="no">void</span><span class="w"> </span><span class="no">const</span><span class="p">*,</span><span class="w"> </span><span class="no">unsigned</span><span class="w"> </span><span class="no">int</span><span class="p">)</span>
+<span class="w">        </span><span class="nf">add</span><span class="w">     </span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="mi">#16</span>
+<span class="w">        </span><span class="nf">pop</span><span class="w">     </span><span class="p">{</span><span class="no">r11</span><span class="p">,</span><span class="w"> </span><span class="no">pc</span><span class="p">}</span>
+
+<span class="nf">send_user_record_safe</span><span class="p">(</span><span class="no">int</span><span class="p">,</span><span class="w"> </span><span class="no">int</span><span class="p">,</span><span class="w"> </span><span class="no">char</span><span class="p">,</span><span class="w"> </span><span class="no">char</span><span class="p">):</span>
+<span class="w">        </span><span class="nf">push</span><span class="w">    </span><span class="p">{</span><span class="no">r11</span><span class="p">,</span><span class="w"> </span><span class="no">lr</span><span class="p">}</span>
+<span class="w">        </span><span class="nf">sub</span><span class="w">     </span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="mi">#16</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">r12</span><span class="p">,</span><span class="w"> </span><span class="mi">#0</span>
+<span class="w">        </span><span class="nf">stmib</span><span class="w">   </span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="no">r0</span><span class="p">,</span><span class="w"> </span><span class="no">r12</span><span class="p">}</span>
+<span class="w">        </span><span class="nf">str</span><span class="w">     </span><span class="no">r1</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="mi">#12</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">r0</span><span class="p">,</span><span class="w"> </span><span class="no">sp</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">r1</span><span class="p">,</span><span class="w"> </span><span class="mi">#16</span>
+<span class="w">        </span><span class="nf">str</span><span class="w">     </span><span class="no">r12</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">sp</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">strb</span><span class="w">    </span><span class="no">r3</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="mi">#8</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">strb</span><span class="w">    </span><span class="no">r2</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">sp</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">bl</span><span class="w">      </span><span class="no">transmit</span><span class="p">(</span><span class="no">void</span><span class="w"> </span><span class="no">const</span><span class="p">*,</span><span class="w"> </span><span class="no">unsigned</span><span class="w"> </span><span class="no">int</span><span class="p">)</span>
+<span class="w">        </span><span class="nf">add</span><span class="w">     </span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="mi">#16</span>
+<span class="w">        </span><span class="nf">pop</span><span class="w">     </span><span class="p">{</span><span class="no">r11</span><span class="p">,</span><span class="w"> </span><span class="no">pc</span><span class="p">}</span>
+
+<span class="nf">decrypt_message</span><span class="p">(</span><span class="no">char</span><span class="w"> </span><span class="no">const</span><span class="p">*):</span>
+<span class="w">        </span><span class="nf">push</span><span class="w">    </span><span class="p">{</span><span class="no">r11</span><span class="p">,</span><span class="w"> </span><span class="no">lr</span><span class="p">}</span>
+<span class="w">        </span><span class="nf">sub</span><span class="w">     </span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="mi">#128</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">r0</span><span class="p">,</span><span class="w"> </span><span class="no">sp</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">r1</span><span class="p">,</span><span class="w"> </span><span class="mi">#128</span>
+<span class="w">        </span><span class="nf">bl</span><span class="w">      </span><span class="no">read_encrypted</span><span class="p">(</span><span class="no">void</span><span class="p">*,</span><span class="w"> </span><span class="no">unsigned</span><span class="w"> </span><span class="no">int</span><span class="p">)</span>
+<span class="w">        </span><span class="nf">add</span><span class="w">     </span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="mi">#128</span>
+<span class="w">        </span><span class="nf">pop</span><span class="w">     </span><span class="p">{</span><span class="no">r11</span><span class="p">,</span><span class="w"> </span><span class="no">pc</span><span class="p">}</span>
+
+<span class="nf">log_network_event</span><span class="p">(</span><span class="no">char</span><span class="w"> </span><span class="no">const</span><span class="p">*):</span>
+<span class="w">        </span><span class="nf">push</span><span class="w">    </span><span class="p">{</span><span class="no">r4</span><span class="p">,</span><span class="w"> </span><span class="no">lr</span><span class="p">}</span>
+<span class="w">        </span><span class="nf">sub</span><span class="w">     </span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="mi">#128</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">r1</span><span class="p">,</span><span class="w"> </span><span class="no">r0</span>
+<span class="w">        </span><span class="nf">ldr</span><span class="w">     </span><span class="no">r0</span><span class="p">,</span><span class="w"> </span><span class="no">.LCPI4_0</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">r2</span><span class="p">,</span><span class="w"> </span><span class="mi">#32</span>
+<span class="w">        </span><span class="nf">strb</span><span class="w">    </span><span class="no">r2</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="mi">#6</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">r2</span><span class="p">,</span><span class="w"> </span><span class="mi">#596</span>
+<span class="w">        </span><span class="nf">orr</span><span class="w">     </span><span class="no">r2</span><span class="p">,</span><span class="w"> </span><span class="no">r2</span><span class="p">,</span><span class="w"> </span><span class="mi">#14336</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">r4</span><span class="p">,</span><span class="w"> </span><span class="no">sp</span>
+<span class="w">        </span><span class="nf">strh</span><span class="w">    </span><span class="no">r2</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="mi">#4</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">str</span><span class="w">     </span><span class="no">r0</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">sp</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">orr</span><span class="w">     </span><span class="no">r0</span><span class="p">,</span><span class="w"> </span><span class="no">r4</span><span class="p">,</span><span class="w"> </span><span class="mi">#7</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">r2</span><span class="p">,</span><span class="w"> </span><span class="mi">#120</span>
+<span class="w">        </span><span class="nf">bl</span><span class="w">      </span><span class="no">strncpy</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">r0</span><span class="p">,</span><span class="w"> </span><span class="mi">#0</span>
+<span class="w">        </span><span class="nf">strb</span><span class="w">    </span><span class="no">r0</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="mi">#127</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">r0</span><span class="p">,</span><span class="w"> </span><span class="no">r4</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">r1</span><span class="p">,</span><span class="w"> </span><span class="mi">#128</span>
+<span class="w">        </span><span class="nf">bl</span><span class="w">      </span><span class="no">transmit</span><span class="p">(</span><span class="no">void</span><span class="w"> </span><span class="no">const</span><span class="p">*,</span><span class="w"> </span><span class="no">unsigned</span><span class="w"> </span><span class="no">int</span><span class="p">)</span>
+<span class="w">        </span><span class="nf">add</span><span class="w">     </span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="mi">#128</span>
+<span class="w">        </span><span class="nf">pop</span><span class="w">     </span><span class="p">{</span><span class="no">r4</span><span class="p">,</span><span class="w"> </span><span class="no">pc</span><span class="p">}</span>
+<span class="nl">.LCPI4_0:</span>
+<span class="w">        </span><span class="na">.long</span><span class="w">   </span><span class="mi">1313166917</span>
+
+<span class="nf">log_network_event_safe</span><span class="p">(</span><span class="no">char</span><span class="w"> </span><span class="no">const</span><span class="p">*):</span>
+<span class="w">        </span><span class="nf">push</span><span class="w">    </span><span class="p">{</span><span class="no">r4</span><span class="p">,</span><span class="w"> </span><span class="no">lr</span><span class="p">}</span>
+<span class="w">        </span><span class="nf">sub</span><span class="w">     </span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="mi">#128</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">r1</span><span class="p">,</span><span class="w"> </span><span class="no">r0</span>
+<span class="w">        </span><span class="nf">ldr</span><span class="w">     </span><span class="no">r0</span><span class="p">,</span><span class="w"> </span><span class="no">.LCPI5_0</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">r2</span><span class="p">,</span><span class="w"> </span><span class="mi">#32</span>
+<span class="w">        </span><span class="nf">strb</span><span class="w">    </span><span class="no">r2</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="mi">#6</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">r2</span><span class="p">,</span><span class="w"> </span><span class="mi">#596</span>
+<span class="w">        </span><span class="nf">orr</span><span class="w">     </span><span class="no">r2</span><span class="p">,</span><span class="w"> </span><span class="no">r2</span><span class="p">,</span><span class="w"> </span><span class="mi">#14336</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">r4</span><span class="p">,</span><span class="w"> </span><span class="no">sp</span>
+<span class="w">        </span><span class="nf">strh</span><span class="w">    </span><span class="no">r2</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="mi">#4</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">str</span><span class="w">     </span><span class="no">r0</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">sp</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">orr</span><span class="w">     </span><span class="no">r0</span><span class="p">,</span><span class="w"> </span><span class="no">r4</span><span class="p">,</span><span class="w"> </span><span class="mi">#7</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">r2</span><span class="p">,</span><span class="w"> </span><span class="mi">#120</span>
+<span class="w">        </span><span class="nf">bl</span><span class="w">      </span><span class="no">strncpy</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">r0</span><span class="p">,</span><span class="w"> </span><span class="mi">#0</span>
+<span class="w">        </span><span class="nf">strb</span><span class="w">    </span><span class="no">r0</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="mi">#127</span><span class="p">]</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">r0</span><span class="p">,</span><span class="w"> </span><span class="no">r4</span>
+<span class="w">        </span><span class="nf">mov</span><span class="w">     </span><span class="no">r1</span><span class="p">,</span><span class="w"> </span><span class="mi">#128</span>
+<span class="w">        </span><span class="nf">bl</span><span class="w">      </span><span class="no">transmit</span><span class="p">(</span><span class="no">void</span><span class="w"> </span><span class="no">const</span><span class="p">*,</span><span class="w"> </span><span class="no">unsigned</span><span class="w"> </span><span class="no">int</span><span class="p">)</span>
+<span class="w">        </span><span class="nf">add</span><span class="w">     </span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="mi">#128</span>
+<span class="w">        </span><span class="nf">pop</span><span class="w">     </span><span class="p">{</span><span class="no">r4</span><span class="p">,</span><span class="w"> </span><span class="no">pc</span><span class="p">}</span>
+<span class="nl">.LCPI5_0:</span>
+<span class="w">        </span><span class="na">.long</span><span class="w">   </span><span class="mi">1313166917</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="explanation">Explanation<a class="headerlink" href="#explanation" title="Permanent link">&para;</a></h2>
+<p>the key insight is that this code demonstrates <strong>information disclosure vulnerabilities that are invisible in the source code but visible in the compiled assembly</strong>.</p>
+<h3 id="the-core-problem-uninitialized-memory-leaks">The Core Problem: Uninitialized Memory Leaks<a class="headerlink" href="#the-core-problem-uninitialized-memory-leaks" title="Permanent link">&para;</a></h3>
+<p>The most important pattern here is that <strong>the compiler does not automatically zero uninitialized memory</strong>. When you allocate a struct or buffer on the stack, whatever data was previously there remains—and gets sent over the network.</p>
+<hr />
+<h3 id="function-by-function-breakdown">Function-by-Function Breakdown<a class="headerlink" href="#function-by-function-breakdown" title="Permanent link">&para;</a></h3>
+<h4 id="handle_login-the-simplest-case"><code>handle_login</code> — The Simplest Case<a class="headerlink" href="#handle_login-the-simplest-case" title="Permanent link">&para;</a></h4>
+<p><div class="highlight"><pre><span></span><code>bx      lr
+</code></pre></div>
+This function is completely optimized away. The compiler recognizes that <code>secret_buf</code> is never used after the <code>strncpy</code>, so it eliminates the entire function body. The password bytes sit on the stack, but the function returns immediately without cleaning up.</p>
+<hr />
+<h4 id="send_user_record-the-vulnerable-struct"><code>send_user_record</code> — The Vulnerable Struct<a class="headerlink" href="#send_user_record-the-vulnerable-struct" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>push    {r11, lr}           // Save frame pointer and return address
+sub     sp, sp, #16         // Allocate 16 bytes for struct bad_record
+str     r1, [sp, #12]       // Store gid parameter at offset 12
+str     r0, [sp, #4]        // Store uid parameter at offset 4
+mov     r0, sp              // Load struct address into r0
+mov     r1, #16             // Load size (16 bytes) into r1
+strb    r3, [sp, #8]        // Store active parameter (byte) at offset 8
+strb    r2, [sp]            // Store role parameter (byte) at offset 0
+bl      transmit            // Call transmit with (r0=&amp;struct, r1=16)
+add     sp, sp, #16         // Deallocate stack
+pop     {r11, pc}           // Restore and return
+</code></pre></div>
+<p><strong>The vulnerability:</strong> The struct is 16 bytes, but only 10 bytes are actually initialized:
+- Offset 0: <code>role</code> (1 byte)
+- Offset 1–3: <strong>PADDING — never written</strong> ← Contains garbage
+- Offset 4–7: <code>uid</code> (4 bytes)
+- Offset 8: <code>active</code> (1 byte)
+- Offset 9–11: <strong>PADDING — never written</strong> ← Contains garbage
+- Offset 12–15: <code>gid</code> (4 bytes)</p>
+<p>The 6 padding bytes are sent to the network untouched. If this stack frame overlaps with <code>handle_login</code>'s previous stack space, those padding bytes may contain fragments of the password.</p>
+<hr />
+<h4 id="send_user_record_safe-the-fix"><code>send_user_record_safe</code> — The Fix<a class="headerlink" href="#send_user_record_safe-the-fix" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>push    {r11, lr}
+sub     sp, sp, #16
+mov     r12, #0             // Load 0 into r12
+stmib   sp, {r0, r12}       // Store r0 and r12 (0) at sp+4 and sp+8
+str     r1, [sp, #12]       // Store gid at offset 12
+mov     r0, sp
+mov     r1, #16
+str     r12, [sp]           // Store 0 at offset 0
+strb    r3, [sp, #8]        // Store active at offset 8
+strb    r2, [sp]            // Store role at offset 0
+bl      transmit
+add     sp, sp, #16
+pop     {r11, pc}
+</code></pre></div>
+<p><strong>The key difference:</strong> Before assigning individual fields, the compiler initializes the struct with zeros using <code>stmib</code> (store multiple, increment before). The <code>stmib sp, {r0, r12}</code> instruction writes two registers starting at <code>sp+4</code>, effectively clearing the padding bytes. Now all 16 bytes are guaranteed to be zero before the meaningful fields are written.</p>
+<hr />
+<h4 id="decrypt_message-stack-allocation-without-cleanup"><code>decrypt_message</code> — Stack Allocation Without Cleanup<a class="headerlink" href="#decrypt_message-stack-allocation-without-cleanup" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>push    {r11, lr}
+sub     sp, sp, #128        // Allocate 128-byte buffer for plaintext
+mov     r0, sp              // Pass buffer address to read_encrypted
+mov     r1, #128            // Pass size
+bl      read_encrypted      // Fill buffer with decrypted data
+add     sp, sp, #128        // Deallocate (but data remains on stack)
+pop     {r11, pc}
+</code></pre></div>
+<p>The 128 bytes of decrypted secret data remain on the stack after this</p>
+<hr />
+<p><a href="../../">← Back to armv7-clang2110</a></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../../..", "features": ["content.code.copy", "navigation.sections", "navigation.indexes", "navigation.top", "toc.follow"], "search": "../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
