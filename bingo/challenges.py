@@ -574,4 +574,48 @@ CHALLENGE_POOL: List[Challenge] = [
         hint="See: hardening/msvc-gs-canary",
         accept=["true"],
     ),
+
+    # ===================================================================
+    # Padding / Stack-Reuse Leak  (4 challenges)
+    # ===================================================================
+    Challenge(
+        id="sec_padding_leak",
+        challenge_type="security",
+        category="security",
+        difficulty=2,
+        prompt="Sending a struct over the network with field-by-field assignment can leak stack data through...",
+        answer="Uninitialized padding bytes (alignment gaps between fields)",
+        hint="See: security/padding-leak",
+        accept=["padding", "alignment"],
+    ),
+    Challenge(
+        id="sec_stack_reuse_leak",
+        challenge_type="security",
+        category="security",
+        difficulty=2,
+        prompt="A function's local buffer sent over the network may contain secrets from a prior call due to...",
+        answer="Stack slot reuse (compiler reuses stack space for non-overlapping lifetimes)",
+        hint="See: security/padding-leak",
+        accept=["stack reuse", "stack slot"],
+    ),
+    Challenge(
+        id="tf_padding_zeroed",
+        challenge_type="true_false",
+        category="security",
+        difficulty=2,
+        prompt="True or False: Assigning every field of a struct guarantees all bytes (including padding) are initialized",
+        answer="False \u2014 field assignment skips padding bytes; use memset(&s, 0, sizeof(s)) first",
+        hint="See: security/padding-leak",
+        accept=["false"],
+    ),
+    Challenge(
+        id="scen_padding_fix",
+        challenge_type="scenario_compare",
+        category="security",
+        difficulty=1,
+        prompt="To prevent leaking stack data through struct padding when sending over a network, zero the struct with...",
+        answer="memset(&rec, 0, sizeof(rec)) before assigning fields",
+        hint="See: security/padding-leak",
+        accept=["memset"],
+    ),
 ]

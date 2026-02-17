@@ -145,7 +145,7 @@ answering a mix of difficulties.
 
 ## Challenge Types
 
-The 53 challenges in the pool span six categories:
+The 57 challenges in the pool span six categories:
 
 | Type | Example Prompt |
 |------|---------------|
